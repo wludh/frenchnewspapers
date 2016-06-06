@@ -4,6 +4,8 @@ from nltk import word_tokenize, FreqDist
 from nltk.corpus import stopwords, names
 import codecs
 import os
+import drive
+import re
 
 CORPUS = 'clean_ocr'
 
@@ -39,13 +41,29 @@ def all_file_names(dirname=CORPUS):
 def strip_off_file_path(filename):
     """Takes off extraneous information from the file
      path and returns the filename alone"""
-    return filename[10:-10]
+    filename = re.sub(r'^.*/|_clean.txt', '', filename) 
+    return filename.lower()
 
 
 def read_all_texts(filenames):
     """Given a list of filenames, read each of them"""
     for f in filenames:
         yield (strip_off_file_path(f), read_text(f))
+
+
+def get_articles_metadata(list_of_articles):
+    """takes articles in form of [filename, [tokens]], goes out to google drive and gives it the necessary date and time information."""
+    metadata = drive.get_article_metadata()
+    new_list_of_articles = []
+    for article in list_of_articles:
+        for row in metadata:
+            if row['filename'] == article[0]:
+               new_list_of_articles.append((article[0], row['newspaper name'] , row['date'], article[1]))
+            else:
+                print("********ERROR: FILENAME AND DATE MISMATCH ********")
+                print(row['filename'] + '   ≠   ' + article[0])
+                print("*************")
+    return new_list_of_articles
 
 
 def read_text(filename):
@@ -99,7 +117,7 @@ def read_out(articles):
     """given a series of articles, print out stats for them
     articles are given as a list of tuple pairs (filename, list of tokens)"""
     for article in articles:
-        tokens = tokenize_text(article[1])
+        tokens = tokenize_text(article[3])
         print("===================")
         print(article[0])
         print("Number of tokens: " + str(calc_article_length(tokens)))
@@ -113,8 +131,11 @@ def read_out(articles):
 def main():
     """Main function to be called when the script is called"""
     file_names = list(all_file_names(CORPUS))
+    print(file_names)
     texts = list(read_all_texts(file_names))
-    read_out(texts)
+    texts_with_metadata = get_articles_metadata(texts)
+    # print(texts_with_metadata[0])
+    read_out(texts_with_metadata)
 
 if __name__ == '__main__':
     main()
