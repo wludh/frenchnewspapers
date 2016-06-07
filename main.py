@@ -61,8 +61,10 @@ def get_articles_metadata(list_of_articles, debug=False):
     for article in list_of_articles:
         for row in metadata:
             if row['filename'] == article[0]:
-                new_list_of_articles.append((article[0], row['newspaper name'],
-                                            row['date'], article[1]))
+                new_list_of_articles.append({'file_name': article[0],
+                                             'journal': row['newspaper name'],
+                                             'date': row['date'],
+                                             'tokens': tokenize_text(article[1])})
             elif debug:
                 print("********ERROR: FILENAME AND DATE MISMATCH ********")
                 print(row['filename'] + '   ≠   ' + article[0])
@@ -141,15 +143,10 @@ def prepare_all_texts(corpus=CORPUS):
     # reads in all filenames from the corpus directory.
     file_names = list(all_file_names(corpus))
     # reads in data of texts
-    articles_dict = []
     texts = list(read_all_texts(file_names))
     # reads in article metadata for texts
     texts_with_metadata = get_articles_metadata(texts)
-    for article in texts_with_metadata:
-        articles_dict.append({'file_name': article[0],
-                              'journal': article[1], 'date': article[2],
-                              'tokens': tokenize_text(article[3])})
-    return articles_dict
+    return texts_with_metadata
 
 
 def main():
