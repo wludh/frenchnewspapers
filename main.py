@@ -122,15 +122,18 @@ def find_names(text, list_of_names=LIST_OF_NAMES):
 def read_out(articles):
     """given a series of articles, print out stats for them
     articles are given as a list of tuple pairs (filename, list of tokens)"""
+    output = open('results.txt', 'w')
     for article in articles:
-        print("===================")
-        print(article['file_name'])
-        print("Number of tokens: " +
-              str(calc_article_length(article['tokens'])))
-        print("Most common tokens: " + str(most_common(article['tokens'])))
-        print("Punctuation Counts: " +
-              str([mark for mark in count_punctuation(article['tokens'])]))
-        print("Names: " + str(find_names(article['tokens'])))
+        output.write("===================\n")
+        output.write(article['file_name'] + '\n')
+        output.write("Number of tokens: " +
+                     str(calc_article_length(article['tokens'])) + '\n')
+        output.write("Most common tokens: " +
+                     str(most_common(article['tokens'])) + '\n')
+        output.write("Punctuation Counts: " +
+                     str([mark for mark
+                          in count_punctuation(article['tokens'])]) + '\n')
+        output.write("Names: " + str(find_names(article['tokens'])) + '\n')
 
 
 def prepare_all_texts(corpus=CORPUS):
