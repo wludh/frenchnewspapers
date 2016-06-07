@@ -16,7 +16,7 @@ def generate_stopwords():
     # put custom stopword list here. Could also
     # read in as a csv file if that's easier.
     extra_stopwords = []
-    punctuation = ['»', '«', ',', '-', '.', '!', "\"", ':', ';', '?', '...']
+    punctuation = ['»', '«', ',', '-', '.', '!', "\"", '\'' ':', ';', '?', '...']
     return nltk_stopwords + punctuation + [w.lower() for w in extra_stopwords]
 
 
@@ -41,7 +41,7 @@ def all_file_names(dirname=CORPUS):
 def strip_off_file_path(filename):
     """Takes off extraneous information from the file
      path and returns the filename alone"""
-    filename = re.sub(r'^.*/|_clean.txt', '', filename) 
+    filename = re.sub(r'^.*/|_clean.txt', '', filename)
     return filename.lower()
 
 
@@ -52,7 +52,9 @@ def read_all_texts(filenames):
 
 
 def get_articles_metadata(list_of_articles):
-    """takes articles in form of [filename, [tokens]], goes out to google drive and gives it the necessary date and time information."""
+    """takes articles in form of [filename, [tokens]],
+    goes out to google drive and gives it the necessary
+    date and time information."""
     metadata = drive.get_article_metadata()
     new_list_of_articles = []
     for article in list_of_articles:
@@ -93,7 +95,7 @@ def count_punctuation(text):
     """Gives a count of the given punctuation marks for each text"""
     fd = FreqDist(text)
     punctuation_marks = ['»', '«', ',', '-', '.', '!',
-                         "\"", ':', ';', '?', '...']
+                         "\"", ':', ';', '?', '...', '\'']
     for mark in punctuation_marks:
         count = str(fd[mark])
         yield "%(mark)s, %(count)s" % locals()
@@ -128,14 +130,28 @@ def read_out(articles):
         print("Names: " + name_tokens)
 
 
+def prepare_all_texts(corpus=CORPUS):
+    """"""
+    # reads in all filenames from the corpus directory.
+    file_names = list(all_file_names(corpus))
+    # reads in data of texts
+    articles_dict = []
+    texts = list(read_all_texts(file_names))
+    # reads in article metadata for texts
+    texts_with_metadata = get_articles_metadata(texts)
+    for article in texts_with_metadata:
+        articles_dict.append({'file_name': article[0],
+                              'journal': article[1], 'date': article[2],
+                              'tokens': tokenize_text(article[3])})
+    return articles_dict
+
+
 def main():
     """Main function to be called when the script is called"""
-    file_names = list(all_file_names(CORPUS))
-    print(file_names)
-    texts = list(read_all_texts(file_names))
-    texts_with_metadata = get_articles_metadata(texts)
     # print(texts_with_metadata[0])
-    read_out(texts_with_metadata)
+    text_data = prepare_all_texts()
+    print(text_data[0]['file_name'])
+    # read_out(text_data)
 
 if __name__ == '__main__':
     main()
