@@ -60,7 +60,8 @@ def get_articles_metadata(list_of_articles):
     for article in list_of_articles:
         for row in metadata:
             if row['filename'] == article[0]:
-               new_list_of_articles.append((article[0], row['newspaper name'] , row['date'], article[1]))
+                new_list_of_articles.append((article[0], row['newspaper name'],
+                                            row['date'], article[1]))
             else:
                 print("********ERROR: FILENAME AND DATE MISMATCH ********")
                 print(row['filename'] + '   ≠   ' + article[0])
