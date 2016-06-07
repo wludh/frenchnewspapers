@@ -137,7 +137,7 @@ def read_out(articles):
 
 
 def prepare_all_texts(corpus=CORPUS):
-    """"""
+    """Takes all files from filenames to dict. runs everything in between"""
     # reads in all filenames from the corpus directory.
     file_names = list(all_file_names(corpus))
     # reads in data of texts
