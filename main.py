@@ -16,7 +16,8 @@ def generate_stopwords():
     # put custom stopword list here. Could also
     # read in as a csv file if that's easier.
     extra_stopwords = []
-    punctuation = ['»', '«', ',', '-', '.', '!', "\"", '\'' ':', ';', '?', '...']
+    punctuation = ['»', '«', ',', '-', '.', '!',
+                   "\"", '\'' ':', ';', '?', '...']
     return nltk_stopwords + punctuation + [w.lower() for w in extra_stopwords]
 
 
@@ -51,7 +52,7 @@ def read_all_texts(filenames):
         yield (strip_off_file_path(f), read_text(f))
 
 
-def get_articles_metadata(list_of_articles):
+def get_articles_metadata(list_of_articles, debug=False):
     """takes articles in form of [filename, [tokens]],
     goes out to google drive and gives it the necessary
     date and time information."""
@@ -62,10 +63,12 @@ def get_articles_metadata(list_of_articles):
             if row['filename'] == article[0]:
                 new_list_of_articles.append((article[0], row['newspaper name'],
                                             row['date'], article[1]))
-            else:
+            elif debug:
                 print("********ERROR: FILENAME AND DATE MISMATCH ********")
                 print(row['filename'] + '   ≠   ' + article[0])
                 print("*************")
+            else:
+                pass
     return new_list_of_articles
 
 
@@ -120,15 +123,14 @@ def read_out(articles):
     """given a series of articles, print out stats for them
     articles are given as a list of tuple pairs (filename, list of tokens)"""
     for article in articles:
-        tokens = tokenize_text(article[3])
         print("===================")
-        print(article[0])
-        print("Number of tokens: " + str(calc_article_length(tokens)))
-        print("Most common tokens: " + str(most_common(tokens)))
-        marks = str([thing for thing in count_punctuation(tokens)])
-        print("Punctuation Counts: " + marks)
-        name_tokens = str(find_names(tokens))
-        print("Names: " + name_tokens)
+        print(article['file_name'])
+        print("Number of tokens: " +
+              str(calc_article_length(article['tokens'])))
+        print("Most common tokens: " + str(most_common(article['tokens'])))
+        print("Punctuation Counts: " +
+              str([mark for mark in count_punctuation(article['tokens'])]))
+        print("Names: " + str(find_names(article['tokens'])))
 
 
 def prepare_all_texts(corpus=CORPUS):
@@ -151,8 +153,8 @@ def main():
     """Main function to be called when the script is called"""
     # print(texts_with_metadata[0])
     text_data = prepare_all_texts()
-    print(text_data[0]['file_name'])
-    # read_out(text_data)
+    # print(text_data[0]['file_name'])
+    read_out(text_data)
 
 if __name__ == '__main__':
     main()
