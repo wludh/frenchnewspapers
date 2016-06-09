@@ -16,7 +16,7 @@ CORPUS = 'to_clean'
 
 #
 patterns = [
-            (r'11+', 'll'),
+            (r'111+', 'll'),
             (r'mére', 'mère'),
             (r'pére', 'père'),
             (r'c\b', 'e'),
@@ -41,7 +41,7 @@ def do_the_replacing(filenames):
                 with codecs.open(file + '_temp', 'w', 'utf8') as new_f:
                     for line in f.readlines():
                         for pattern in patterns:
-                            line = re.sub(pattern, line)
+                            line = re.sub(*pattern, line)
                         line = re.sub('change', 'obama', line)
                         new_f.write(line)
             remove(file)
@@ -50,8 +50,7 @@ def do_the_replacing(filenames):
 
 def main():
     filenames = list(all_file_names())
-
-
+    do_the_replacing(filenames)
 
 if __name__ == '__main__':
     main()
