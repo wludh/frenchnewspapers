@@ -13,12 +13,16 @@ CORPUS = 'clean_ocr'
 def generate_stopwords():
     """generates stopwords for use in tokenizing"""
     nltk_stopwords = stopwords.words('french')
+    # stopwords from http://www.ranks.nl/stopwords/french
+    ranks_stopwords = []
+    with codecs.open('french_stopwords.txt', 'r', 'utf8') as f:
+        ranks_stopwords = [x.strip('\n') for x in f]
     # put custom stopword list here. Could also
     # read in as a csv file if that's easier.
     extra_stopwords = []
     punctuation = ['»', '«', ',', '-', '.', '!',
                    "\"", '\'' ':', ';', '?', '...']
-    return nltk_stopwords + punctuation + [w.lower() for w in extra_stopwords]
+    return set(nltk_stopwords + ranks_stopwords + punctuation + extra_stopwords)
 
 
 def names_list():
