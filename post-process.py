@@ -51,6 +51,7 @@ def do_the_replacing(filenames):
 def main():
     filenames = list(all_file_names())
     do_the_replacing(filenames)
+    print('Some stuff was cleaned!')
 
 if __name__ == '__main__':
     main()
