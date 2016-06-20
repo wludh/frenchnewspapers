@@ -2,6 +2,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import re
 
+
 def read_sheet():
     """reads our spreadsheet"""
 
@@ -16,14 +17,16 @@ def read_sheet():
     articles = []
     titles = []
     corrections = []
+    common_ocr_errors = []
 
-    (articles, titles, corrections) = wks.worksheets()
-    return articles, titles, corrections
+    (articles, titles, corrections, common_ocr_errors) = wks.worksheets()
+    return articles, titles, corrections, common_ocr_errors
 
 
 def get_article_metadata():
-    """Gets the filename, date, and publication for each article. Returns a list of dictionaries."""
-    article_sheet, _, _ = read_sheet()
+    """Gets the filename, date, and publication for each article.
+    Returns a list of dictionaries."""
+    article_sheet, _, _, _ = read_sheet()
     results = []
     for article in article_sheet.get_all_values()[1:]:
         row = {}
@@ -35,8 +38,8 @@ def get_article_metadata():
 
 
 def main():
-    articles, titles, corrections = read_sheet()
-    print(get_article_metadata(articles))
+    articles, titles, corrections, common_ocr_errors = read_sheet()
+    print(get_article_metadata())
 
 
 if __name__ == '__main__':

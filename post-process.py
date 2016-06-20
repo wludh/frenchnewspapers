@@ -16,14 +16,14 @@ CORPUS = 'to_clean'
 
 #
 patterns = [
-            (r'111+', 'll'),
-            (r'mére', 'mère'),
-            (r'pére', 'père'),
-            (r'c\b', 'e'),
-            (r'ct', 'et'),
-            (r'cn', 'en'),
-            (r'\.\.\b', '«'),
-            (r'\b\.\.', '»')
+    (r'111+', 'll'),
+    (r'mére', 'mère'),
+    (r'pére', 'père'),
+    (r'c\b', 'e'),
+    (r'ct', 'et'),
+    (r'cn', 'en'),
+    (r'\.\.\b', '«'),
+    (r'\b\.\.', '»')
 ]
 
 

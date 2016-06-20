@@ -6,6 +6,10 @@ import codecs
 import os
 import drive
 import re
+import csv
+import operator
+import dateutil.parser
+
 
 CORPUS = 'clean_ocr'
 
@@ -22,7 +26,8 @@ def generate_stopwords():
     extra_stopwords = []
     punctuation = ['»', '«', ',', '-', '.', '!',
                    "\"", '\'' ':', ';', '?', '...']
-    return set(nltk_stopwords + ranks_stopwords + punctuation + extra_stopwords)
+    return set(nltk_stopwords + ranks_stopwords +
+               punctuation + extra_stopwords)
 
 
 def names_list():
@@ -68,7 +73,8 @@ def get_articles_metadata(list_of_articles, debug=False):
                 new_list_of_articles.append({'file_name': article[0],
                                              'journal': row['newspaper name'],
                                              'date': row['date'],
-                                             'tokens': tokenize_text(article[1])})
+                                             'tokens': tokenize_text(article[1])
+                                             })
             elif debug:
                 print("********ERROR: FILENAME AND DATE MISMATCH ********")
                 print(row['filename'] + '   ≠   ' + article[0])
@@ -109,6 +115,12 @@ def count_punctuation(text):
     for mark in punctuation_marks:
         count = str(fd[mark])
         yield "%(mark)s, %(count)s" % locals()
+
+
+def single_token_count(text, token):
+    """takes a token set and returns the counts for a single mark."""
+    fd = FreqDist(text)
+    return fd[token]
 
 
 def most_common(text):
@@ -153,12 +165,67 @@ def prepare_all_texts(corpus=CORPUS):
     return texts_with_metadata
 
 
+def parse_dates(date):
+    date = dateutil.parser.parse(date)
+    key = ('%s-%s-%s' % (date.year, date.month, date.day))
+    return key
+
+
+def sort_by_date(articles, token):
+    """Takes the list of articles and the parameter to sort by.
+    returns all the data needed for the CSV
+    returns a hash with key values of {(year, month, day):
+    (target token counts for
+    this month, total tokens)}"""
+    index = {}
+    for article in articles:
+        key = parse_dates(article['date'])
+        date_values = index.get(key)
+        if date_values is None:
+            total_doc_tokens = len(article['tokens'])
+            date_values = single_token_count(article['tokens'], token)
+            index[key] = (date_values, total_doc_tokens)
+        else:
+            print(date_values)
+            index[key] = (index[key][0] + single_token_count(article['tokens'], token), index[key][1] + len(article['tokens']))
+        index['year-month-day'] = token
+    return index
+
+# TODO: CSV write out for visualizing
+# TODO: stemming
+
+
+def dict_to_list(a_dict):
+    """takes the result dict and prepares it for writing to csv"""
+    rows = []
+    for (date_key, values) in a_dict.items():
+        try:
+            tf_idf = values[0] / values[1]
+            rows.append([date_key, tf_idf])
+        except:
+            # for the csv header, put it at the beginning of the list
+            rows.insert(0, [date_key, values])
+    # rows.sort(key=operator.itemgetter('year-month'))
+    return rows
+
+
+def csv_dump(results_dict):
+    """writes some information to a CSV for graphing in excel."""
+    results_list = dict_to_list(results_dict)
+
+    with open('results.csv', 'w') as csv_file:
+        csvwriter = csv.writer(csv_file, delimiter=',')
+        for row in results_list:
+            csvwriter.writerow(row)
+
+
 def main():
     """Main function to be called when the script is called"""
     # print(texts_with_metadata[0])
     text_data = prepare_all_texts()
-    # print(text_data[0]['file_name'])
-    read_out(text_data)
+    index = sort_by_date(text_data, 'crime')
+    csv_dump(index)
+    # read_out(text_data)
 
 if __name__ == '__main__':
     main()
