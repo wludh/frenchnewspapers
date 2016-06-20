@@ -186,7 +186,6 @@ def sort_by_date(articles, token):
             date_values = single_token_count(article['tokens'], token)
             index[key] = (date_values, total_doc_tokens)
         else:
-            print(date_values)
             index[key] = (index[key][0] + single_token_count(article['tokens'], token), index[key][1] + len(article['tokens']))
         index['year-month-day'] = token
     return index
@@ -198,6 +197,7 @@ def sort_by_date(articles, token):
 def dict_to_list(a_dict):
     """takes the result dict and prepares it for writing to csv"""
     rows = []
+
     for (date_key, values) in a_dict.items():
         try:
             tf_idf = values[0] / values[1]
@@ -205,7 +205,10 @@ def dict_to_list(a_dict):
         except:
             # for the csv header, put it at the beginning of the list
             rows.insert(0, [date_key, values])
-    # rows.sort(key=operator.itemgetter('year-month'))
+    # sorts things by date
+    rows.sort(key=operator.itemgetter(0))
+    # takes the last row and makes it first, since it gets shuffled to the back
+    rows.insert(0, rows.pop())
     return rows
 
 
@@ -219,9 +222,9 @@ def csv_dump(results_dict):
             csvwriter.writerow(row)
 
 
+
 def main():
     """Main function to be called when the script is called"""
-    # print(texts_with_metadata[0])
     text_data = prepare_all_texts()
     index = sort_by_date(text_data, 'crime')
     csv_dump(index)
