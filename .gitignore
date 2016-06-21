@@ -1,6 +1,8 @@
 
 clean_ocr/
 __pycache__/
-results.txt
+
 to_clean/
 __pycache__/main.cpython-35.pyc
+results.txt
+results.csv

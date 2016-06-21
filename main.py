@@ -6,16 +6,15 @@ from nltk.corpus import stopwords, names
 from nltk.stem.snowball import SnowballStemmer
 import codecs
 import os
-import drive
 import re
 import csv
 import operator
+import datetime
 import dateutil.parser
 
-
-
-# TODO: Refactor for object oriented principles. really required for stemming.
-# TODO: stemming. will need to follow the example below, where you have each text map onto an indexed stem.
+# TODO: stemming. will need to follow the example
+# TODO:
+# below, where you have each text map onto an indexed stem.
 # TODO: take those stems and then integrate that into everything below.
 
 """ A text should have:
@@ -40,6 +39,7 @@ class Corpus(object):
         self.stopwords = self.generate_stopwords()
         self.names_list = self.generate_names_list()
         self.texts = self.build_corpus()
+        self.sort_articles_by_date()
 
     def build_corpus(self):
         """given a corpus directory, make indexed text objects from it"""
@@ -72,8 +72,95 @@ class Corpus(object):
         nltk_names = names.words()
         # put custom name list here.
         extra_names = ['Alexandre', 'Steinheil']
-        LIST_OF_NAMES = [w.lower() for w in nltk_names] + [w.lower() for w in extra_names]
+        LIST_OF_NAMES = \
+            [w.lower() for w in nltk_names] + [w.lower() for w in extra_names]
         return LIST_OF_NAMES
+
+    def read_out(self):
+        """given a series of articles, print out stats for them
+        articles are given as a list of tuple pairs
+        (filename, list of tokens)"""
+        output = open('results.txt', 'w')
+        for text in self.texts:
+            output.write("===================\n")
+            output.write(text.filename + '\n')
+            output.write("Number of tokens: " +
+                         str(text.length) + '\n')
+            output.write("Most common tokens: " +
+                         str(text.most_common()) + '\n')
+            output.write("Punctuation Counts: " +
+                         str(text.count_punctuation()) + '\n')
+            output.write("Names: " + str(text.find_names()) + '\n')
+
+    def sort_articles_by_date(self):
+        """Takes the corpus and sorts them by date. Defaults to this method.
+        Calling it again will resort things by date."""
+        self.texts.sort(key=lambda x:
+                        datetime.datetime.strptime(x.date, "%Y-%m-%d"))
+
+    def group_articles_by_publication(self):
+        """group articles by publication. call it to sort."""
+
+        pub_index = {}
+        new_array = []
+        for text in self.texts:
+            key = text.publication
+            value = pub_index.get(key)
+            if value is None:
+                pub_index[key] = [text]
+            else:
+                pub_index[key] += [text]
+        for key in pub_index.keys():
+            pub_index[key].sort(key=lambda x:
+                           datetime.datetime.strptime(x.date, "%Y-%m-%d"))
+            new_array += pub_index[key]
+        self.texts = new_array
+
+    def single_token_by_date(self, token):
+        """Takes the list of articles and the parameter to sort by.
+        returns all the data needed for the CSV
+        returns a hash with key values of {(year, month, day):
+        (target token counts for
+        this month, total tokens)}"""
+        index = {}
+        for text in self.texts:
+            # for now, graph by date
+            key = text.date
+            column_values = index.get(key)
+            if column_values is None:
+                total_doc_tokens = text.length
+                column_values = text.token_count(token)
+                index[key] = (column_values, total_doc_tokens)
+            else:
+                index[key] = (index[key][0] + text.token_count(token), index[key][1] + text.length)
+            index['year-month-day'] = token
+        return index
+
+    def dict_to_list(a_dict):
+        """takes the result dict and prepares it for writing to csv"""
+        rows = []
+
+        for (date_key, values) in a_dict.items():
+            try:
+                tf_idf = values[0] / values[1]
+                rows.append([date_key, tf_idf])
+            except:
+                # for the csv header, put it at the beginning of the list
+                rows.insert(0, [date_key, values])
+        # sorts things by date
+        rows.sort(key=operator.itemgetter(0))
+        # takes the last row and makes it first, since it gets shuffled to the back
+        rows.insert(0, rows.pop())
+        return rows
+
+    def csv_dump(self, results_dict):
+        """writes some information to a CSV for graphing in excel."""
+        results_list = dict_to_list(results_dict)
+
+        with open('results.csv', 'w') as csv_file:
+            csvwriter = csv.writer(csv_file, delimiter=',')
+            for row in results_list:
+                csvwriter.writerow(row)
 
 
 class IndexedText(object):
@@ -84,7 +171,7 @@ class IndexedText(object):
         self.text = self.read_text()
         self.tokens = [w.lower() for w in word_tokenize(self.text)]
         self.length = len(self.tokens)
-        self.fq = FreqDist(self.tokens)
+        self.fd = FreqDist(self.tokens)
         self.date = self.parse_dates()
         self.year = dateutil.parser.parse(self.date).year
         self.month = dateutil.parser.parse(self.date).month
@@ -142,111 +229,32 @@ class IndexedText(object):
         fd = FreqDist(name_tokens)
         return fd.most_common(50)
 
+    def count_punctuation(self):
+        """Gives a count of the given punctuation marks for each text"""
+        fd = FreqDist(self.tokens)
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+        results = []
+        for mark in punctuation_marks:
+            count = str(fd[mark])
+            results.append("%(mark)s, %(count)s" % locals())
+        return(results)
 
-def count_punctuation(text):
-    """Gives a count of the given punctuation marks for each text"""
-    fd = FreqDist(text)
-    punctuation_marks = ['»', '«', ',', '-', '.', '!',
-                         "\"", ':', ';', '?', '...', '\'']
-    for mark in punctuation_marks:
-        count = str(fd[mark])
-        yield "%(mark)s, %(count)s" % locals()
+    def most_common(self):
+        """takes a series of tokens and returns most common 50 words."""
+        fd = FreqDist(self.tokens_without_stopwords)
+        return fd.most_common(50)
 
-
-def single_token_count(text, token):
-    """takes a token set and returns the counts for a single mark."""
-    fd = FreqDist(text)
-    return fd[token]
-
-
-def most_common(text):
-    """takes a series of tokens and returns most common 50 words."""
-    fd = FreqDist(remove_stopwords(text))
-    return fd.most_common(50)
-
-
-def read_out(articles):
-    """given a series of articles, print out stats for them
-    articles are given as a list of tuple pairs (filename, list of tokens)"""
-    output = open('results.txt', 'w')
-    for article in articles:
-        output.write("===================\n")
-        output.write(article['file_name'] + '\n')
-        output.write("Number of tokens: " +
-                     str(calc_article_length(article['tokens'])) + '\n')
-        output.write("Most common tokens: " +
-                     str(most_common(article['tokens'])) + '\n')
-        output.write("Punctuation Counts: " +
-                     str([mark for mark
-                          in count_punctuation(article['tokens'])]) + '\n')
-        output.write("Names: " + str(find_names(article['tokens'])) + '\n')
-
-
-# def prepare_all_texts(corpus=CORPUS):
-#     """Takes all files from filenames to dict. runs everything in between"""
-#     # reads in all filenames from the corpus directory.
-#     file_names = list(all_file_names(corpus))
-#     # reads in data of texts
-#     texts = list(read_all_texts(file_names))
-#     # reads in article metadata for texts
-#     texts_with_metadata = get_articles_metadata(texts)
-#     return texts_with_metadata
-
-
-def sort_by_date(articles, token):
-    """Takes the list of articles and the parameter to sort by.
-    returns all the data needed for the CSV
-    returns a hash with key values of {(year, month, day):
-    (target token counts for
-    this month, total tokens)}"""
-    index = {}
-    for article in articles:
-        key = parse_dates(article['date'])
-        date_values = index.get(key)
-        if date_values is None:
-            total_doc_tokens = len(article['tokens'])
-            date_values = single_token_count(article['tokens'], token)
-            index[key] = (date_values, total_doc_tokens)
-        else:
-            index[key] = (index[key][0] + single_token_count(article['tokens'], token), index[key][1] + len(article['tokens']))
-        index['year-month-day'] = token
-    return index
-
-
-def dict_to_list(a_dict):
-    """takes the result dict and prepares it for writing to csv"""
-    rows = []
-
-    for (date_key, values) in a_dict.items():
-        try:
-            tf_idf = values[0] / values[1]
-            rows.append([date_key, tf_idf])
-        except:
-            # for the csv header, put it at the beginning of the list
-            rows.insert(0, [date_key, values])
-    # sorts things by date
-    rows.sort(key=operator.itemgetter(0))
-    # takes the last row and makes it first, since it gets shuffled to the back
-    rows.insert(0, rows.pop())
-    return rows
-
-
-def csv_dump(results_dict):
-    """writes some information to a CSV for graphing in excel."""
-    results_list = dict_to_list(results_dict)
-
-    with open('results.csv', 'w') as csv_file:
-        csvwriter = csv.writer(csv_file, delimiter=',')
-        for row in results_list:
-            csvwriter.writerow(row)
+    def token_count(self, token):
+        """takes a token and returns the counts for it in the text."""
+        return self.fd[token]
 
 
 def main():
     """Main function to be called when the script is called"""
     corpus = Corpus()
-    # index = sort_by_date(text_data, 'crime')
-    # csv_dump(index)
-    # read_out(text_data)
+    corpus.csv_dump(corpus.single_token_by_date('crime'))
+
 
 if __name__ == '__main__':
     main()
