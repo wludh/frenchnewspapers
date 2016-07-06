@@ -99,3 +99,17 @@ Others are tied to the individual texts:
     * produces a stemmed index for the text (not fully implemented yet)
 * text.tokens_without_stopwords
     * produces a list of tokens in the text with stopwords excluded.
+
+So to do a lot of the more complicated analyses, you will need to move back and forth between corpus methods and text methods:
+
+```bash
+>> average = 0
+>> for text in corpus.texts:
+>>      average += text.length
+>> average / len(corpus.texts)
+6106.3448275862065
+```
+
+Here I go across the whole corpus, finding the length of each individual text. Adding up all those lengths, I then divide that number by the number of texts in the corpus. This gives me the average number of tokens in the corpus.
+
+You should have everything you need for the basic building blocks of text analysis here. Let me know if anything else comes up.
