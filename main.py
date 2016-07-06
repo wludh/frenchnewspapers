@@ -253,7 +253,8 @@ class IndexedText(object):
 def main():
     """Main function to be called when the script is called"""
     corpus = Corpus()
-    corpus.csv_dump(corpus.single_token_by_date('crime'))
+    corpus.read_out()
+    # corpus.csv_dump(corpus.single_token_by_date('crime'))
 
 
 if __name__ == '__main__':
