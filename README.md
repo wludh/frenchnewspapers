@@ -60,19 +60,19 @@ You can then access any individual text by selecting it from the list:
 
 I've baked in a variety of methods, some tied to the corpus itself and others tied to individual texts. 
 
-corpus.corpus_dir 
+* corpus.corpus_dir 
     give name of the corpus directory
-corpus.stopwords
+* corpus.stopwords
     give the list of stopwords currently being used.
-corpus.names_list
+* corpus.names_list
     give the list of proper names used for querying by proper names
-corpus.texts 
+* corpus.texts 
     give the list of all the texts
-corpus.sort_articles_by_date()
+* corpus.sort_articles_by_date()
     sort the articles by date.
-corpus.read_out()
+* corpus.read_out()
     output to a file called 'results.txt' a variety of stats about the texts in the corpus.
-corpus.group_articles_by_publication()
+* corpus.group_articles_by_publication()
     orders the texts by publication and then each of these groupings by date.
-corpus.csv_dump(corpus.single_token_by_date('token'))
+* corpus.csv_dump(corpus.single_token_by_date('token'))
     Actually two methods in one - csv_dump and single_token_by_date. The latter charts the usage of a single token across the corpus and the former writes it to a csv file for graphing in excel.
