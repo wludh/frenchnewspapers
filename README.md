@@ -114,3 +114,9 @@ So to do a lot of the more complicated analyses, you will need to move back and 
 Here I loop across the whole corpus, finding the length of each individual text. Adding up all those lengths, I then divide that number by the number of texts in the corpus. This gives me the average number of tokens in the corpus.
 
 You should have everything you need for the basic building blocks of text analysis here. Let me know if anything else comes up.
+
+And a final note: be sure to re-sync your computer's copy of the repository with the master version here on GitHub when you get ready to work each day by running 
+
+```bash
+$ git pull
+```
