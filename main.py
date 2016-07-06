@@ -136,7 +136,7 @@ class Corpus(object):
             index['year-month-day'] = token
         return index
 
-    def dict_to_list(a_dict):
+    def dict_to_list(self, a_dict):
         """takes the result dict and prepares it for writing to csv"""
         rows = []
 
@@ -155,6 +155,7 @@ class Corpus(object):
 
     def csv_dump(self, results_dict):
         """writes some information to a CSV for graphing in excel."""
+        print(results_dict)
         results_list = self.dict_to_list(results_dict)
 
         with open('results.csv', 'w') as csv_file:
