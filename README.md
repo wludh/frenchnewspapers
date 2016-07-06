@@ -33,7 +33,7 @@ Individual scripts can be created for a particular purpose by modifying the main
 A more flexible way to interact with the corpus is by importing the main script in the python interpreter. First, fire up your python interpreter and import your main.py package.
 
 ```bash
-$ python 3
+$ python3
 >> import main
 >> corpus = main.Corpus()
 ```
