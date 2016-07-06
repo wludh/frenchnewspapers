@@ -167,7 +167,7 @@ class IndexedText(object):
     """Text object"""
     def __init__(self, filepath):
         self.filepath = filepath
-        self.filename = re.sub(r'^.*/|_clean.txt', '', filepath).lower()
+        self.filename = re.sub(r'^.*/|_clean.txt|_Clean.txt', '', filepath).lower()
         self.text = self.read_text()
         self.tokens = [w.lower() for w in word_tokenize(self.text)]
         self.length = len(self.tokens)
@@ -185,6 +185,7 @@ class IndexedText(object):
     def read_text(self):
         """given a filename read in the text."""
         with codecs.open(self.filepath, 'r', 'utf8') as f:
+            print(self.filepath)
             return f.read()
 
     def parse_publication(self):
@@ -198,6 +199,7 @@ class IndexedText(object):
         date_pattern = r'[jJ]anuary[a-zA-Z0-9_]*|[fF]ebruary[a-zA-Z0-9_]*|[mM]arch[a-zA-Z0-9_]*|[aA]pril[a-zA-Z0-9_]*|[mM]ay[a-zA-Z0-9_]*|[jJ]une[a-zA-Z0-9_]*|[jJ]uly[a-zA-Z0-9_]*|[aA]ugust[a-zA-Z0-9_]*|[sS]eptember[a-zA-Z0-9_]*|[oO]ctober[a-zA-Z0-9_]*|[nN]ovember[a-zA-Z0-9_]*|[dD]ecember[a-zA-Z0-9_]*'
         date = re.findall(date_pattern, self.filename)
         # replaces the underscores with dashes
+        print(date)
         date = dateutil.parser.parse(re.sub(r'_', '-', date[0]))
         return ('%s-%s-%s' % (date.year, date.month, date.day))
 
