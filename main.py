@@ -155,7 +155,7 @@ class Corpus(object):
 
     def csv_dump(self, results_dict):
         """writes some information to a CSV for graphing in excel."""
-        results_list = dict_to_list(results_dict)
+        results_list = self.dict_to_list(results_dict)
 
         with open('results.csv', 'w') as csv_file:
             csvwriter = csv.writer(csv_file, delimiter=',')
