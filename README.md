@@ -7,7 +7,7 @@ To begin, clone the repository and change into it.
 # Setup
 
 ```bash
-$ git clone git@github.com:wludh/frenchnewspapers.git
+$ git clone https://github.com/wludh/frenchnewspapers.git
 $ cd frenchnewspapers
 ```
 
