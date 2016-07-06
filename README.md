@@ -58,7 +58,7 @@ You can then access any individual text by selecting it from the list:
 ['assassinat', 'du', 'peintre', 'steinheil', 'et', 'de', 'sa', 'belle-mère', 'mme', 'veuve', 'japy', 'mme', 'steinheil', 'échappe', 'a', 'la', 'mort', 'un', 'crime', 'épouvantable', ',', 'un', 'triple', 'assassinat', ',', 'a', 'été', 'commis', 'à', 'paris', 'dans', 'la', 'nuit', 'de', 'samedi', 'à', 'dimanche', '.', 'dans', 'la', 'série', 'des', 'meurtres', "qu'il", 'faut', 'enregistrer', 'chaque', 'jour', ',', 'celui-là', 'prend', 'une', 'place', 'à', 'part', '.',...
 ```
 
-I've baked in a variety of methods, some tied to the corpus itself and others tied to individual texts. 
+I've baked in a variety of methods, some tied to the corpus itself:
 
 * corpus.corpus_dir 
     * give name of the corpus directory
@@ -76,3 +76,26 @@ I've baked in a variety of methods, some tied to the corpus itself and others ti
     * orders the texts by publication and then each of these groupings by date.
 * corpus.csv_dump(corpus.single_token_by_date('token'))
     * Actually two methods in one - csv_dump and single_token_by_date. The latter charts the usage of a single token across the corpus and the former writes it to a csv file for graphing in excel.
+
+Others are tied to the individual texts:
+
+* text.filename
+    * give filename of text
+* text.text
+    * give unprocessed text (includes line breaks, etc.)
+* text.tokens
+    * give tokenized version of a text
+* text.length
+    * give the length of a text (number of tokens)
+* text.fd
+    * give a frequency distribution of the text (number of uses of each individual token)
+* text.date
+    * give date of a text. Can be further broken down with text.year, text.month, and text.day
+* text.publication
+    * give the name of the journal that published the text.
+* text.stemmer
+    * produces a French stemmer for the text (not fully implemented yet)
+* text.index
+    * produces a stemmed index for the text (not fully implemented yet)
+* text.tokens_without_stopwords
+    * produces a list of tokens in the text with stopwords excluded.
