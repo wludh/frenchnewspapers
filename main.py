@@ -189,7 +189,7 @@ class IndexedText(object):
     def read_text(self):
         """given a filename read in the text."""
         with codecs.open(self.filepath, 'r', 'utf8') as f:
-            print(self.filepath)
+            print(self.filename)
             return f.read()
 
     def parse_publication(self):
@@ -203,7 +203,6 @@ class IndexedText(object):
         date_pattern = r'[jJ]anuary[a-zA-Z0-9_]*|[fF]ebruary[a-zA-Z0-9_]*|[mM]arch[a-zA-Z0-9_]*|[aA]pril[a-zA-Z0-9_]*|[mM]ay[a-zA-Z0-9_]*|[jJ]une[a-zA-Z0-9_]*|[jJ]uly[a-zA-Z0-9_]*|[aA]ugust[a-zA-Z0-9_]*|[sS]eptember[a-zA-Z0-9_]*|[oO]ctober[a-zA-Z0-9_]*|[nN]ovember[a-zA-Z0-9_]*|[dD]ecember[a-zA-Z0-9_]*'
         date = re.findall(date_pattern, self.filename)
         # replaces the underscores with dashes
-        print(date)
         date = dateutil.parser.parse(re.sub(r'_', '-', date[0]))
         return ('%s-%s-%s' % (date.year, date.month, date.day))
 
