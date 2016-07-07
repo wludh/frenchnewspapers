@@ -46,7 +46,10 @@ class Corpus(object):
         texts = []
         for (root, _, files) in os.walk(self.corpus_dir):
             for fn in files:
-                texts.append(IndexedText(os.path.join(root, fn)))
+                if fn[0] == '.':
+                    pass
+                else:
+                    texts.append(IndexedText(os.path.join(root, fn)))
         return texts
 
     def generate_stopwords(self):
