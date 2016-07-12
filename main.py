@@ -2,6 +2,7 @@
 
 import nltk
 from nltk import word_tokenize, FreqDist, PorterStemmer
+import nltk.data
 from nltk.corpus import stopwords, names
 from nltk.stem.snowball import SnowballStemmer
 import codecs
@@ -173,7 +174,8 @@ class IndexedText(object):
         self.filepath = filepath
         self.filename = re.sub(r'^.*/|_clean.txt|_Clean.txt', '', filepath).lower()
         self.text = self.read_text()
-        self.tokens = [w.lower() for w in word_tokenize(self.text)]
+        self.sentences = self.get_text_sentences()
+        self.tokens = self.flatten_sentences()
         self.length = len(self.tokens)
         self.fd = FreqDist(self.tokens)
         self.date = self.parse_dates()
@@ -185,6 +187,22 @@ class IndexedText(object):
         self.index = nltk.Index((self.stem(word), i)
                          for (i, word) in enumerate(self.tokens))
         self.tokens_without_stopwords = self.remove_stopwords()
+
+    def get_text_sentences(self):
+        """returns sentences from a text"""
+        tokenizer = nltk.data.load('tokenizers/punkt/french.pickle')
+        untokenized_sentences = [w.lower() for w in tokenizer.tokenize(self.text)]
+        matches = []
+        for sent in untokenized_sentences:
+            matches.append(re.findall(
+                r'\w+|[\'\"\/^/\,\-\:\.\;\?\!\(0-9]', sent
+            ))
+        return matches
+
+    def flatten_sentences(self):
+        """takes those sentences and returns tokens"""
+        return [item for sublist in self.sentences for item in sublist]
+
 
     def read_text(self):
         """given a filename read in the text."""
