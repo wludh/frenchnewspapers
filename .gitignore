@@ -6,3 +6,4 @@ to_clean/
 __pycache__/main.cpython-35.pyc
 results.txt
 results.csv
+env/
