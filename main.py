@@ -153,7 +153,8 @@ class Corpus(object):
                 rows.insert(0, [date_key, values])
         # sorts things by date
         rows.sort(key=operator.itemgetter(0))
-        # takes the last row and makes it first, since it gets shuffled to the back
+        # takes the last row and makes it first,
+        # since it gets shuffled to the back
         rows.insert(0, rows.pop())
         return rows
 
@@ -166,6 +167,16 @@ class Corpus(object):
             csvwriter = csv.writer(csv_file, delimiter=',')
             for row in results_list:
                 csvwriter.writerow(row)
+
+    def list_all_filenames(self):
+        for text in self.texts:
+            print(text.filename)
+
+    def find_by_filename(self, name):
+        """given a filename, return the text associated with it."""
+        for text in self.texts:
+            if text.filename == name:
+                return text
 
 
 class IndexedText(object):

@@ -76,6 +76,21 @@ I've baked in a variety of methods, some tied to the corpus itself:
     * orders the texts by publication and then each of these groupings by date.
 * corpus.csv_dump(corpus.single_token_by_date('token'))
     * Actually two methods in one - csv_dump and single_token_by_date. The latter charts the usage of a single token across the corpus and the former writes it to a csv file for graphing in excel.
+* corpus.list_all_filenames()
+    * prints out all filenames in the corpus folder
+* corpus.find_by_filename('an_example_filename_here')
+    * take the filename (note the quotation marks) and return the text object associated with it. So you could do something like to store a text as a variable and then manipulate it for the future:
+    ```python
+    >>> corpus.list_all_filenames
+    croix_june_2_1908
+    croix_november_14_1909
+    croix_november_26_1908
+    croix_november_27_1908
+    >>> my_text = corpus.find_by_filename('croix_november_26_1908')
+    >>> my_text.filename
+    croix_november_26_1908
+    >>> my_text.tokens
+    ```
 
 Others are tied to the individual texts:
 
@@ -99,6 +114,19 @@ Others are tied to the individual texts:
     * produces a stemmed index for the text (not fully implemented yet)
 * text.tokens_without_stopwords
     * produces a list of tokens in the text with stopwords excluded.
+* text.bigrams
+    * produces a list of word pairs or bigrams for the text as a list of tuples. Ex. [‘this’, ‘is’, ‘a’, ‘sentence’] becomes [(‘this’, ‘is’), (‘is’, ‘a’), (‘a’, ‘sentence’)]. 
+    * Keep in mind that each tuple is a unit, denoted by the (). You can access them as a unit: text.trigrams.count(('mme', 'steinheil')) will give you the number of times the bigram 'mme steinheil' occurs in a text. 
+    * Or you can break apart the tuple and manipulate each unit of the tuple separately. The following will loop over all bigrams by assigning variable names to first and second element in each tuple, check to see if the second word in the pair is 'steinheil' and, if so, print the pair to the console. It effectively gives a list of all the different words that Steinheil follows:
+    ```python
+    for first, second in my_text.bigrams:
+         if second == 'steinheil':
+              print(first + " " second)
+
+
+    ```
+* text.trigrams
+    * produces a list of consecutive three-word phrases. Can be manipulated in the same way as text.bigrams.
 
 So to do a lot of the more complicated analyses, you will need to move back and forth between corpus methods and text methods:
 
