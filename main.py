@@ -176,6 +176,8 @@ class IndexedText(object):
         self.text = self.read_text()
         self.sentences = self.get_text_sentences()
         self.tokens = self.flatten_sentences()
+        self.bigrams = list(nltk.bigrams(self.tokens))
+        self.trigrams = list(nltk.trigrams(self.tokens))
         self.length = len(self.tokens)
         self.fd = FreqDist(self.tokens)
         self.date = self.parse_dates()
