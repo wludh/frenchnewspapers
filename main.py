@@ -41,6 +41,7 @@ class Corpus(object):
         self.names_list = self.generate_names_list()
         self.texts = self.build_corpus()
         self.sort_articles_by_date()
+        self.publications = [text.publication for text in self.texts]
 
     def build_corpus(self):
         """given a corpus directory, make indexed text objects from it"""
@@ -52,6 +53,14 @@ class Corpus(object):
                 else:
                     texts.append(IndexedText(os.path.join(root, fn)))
         return texts
+
+    def tokens_by_publication_cfd(self):
+        cfd = nltk.ConditionalFreqDist(
+            (text.publication, word)
+            for text in self.texts
+            for word in text.tokens
+                )
+        return cfd
 
     def generate_stopwords(self):
         global STOPWORD_LIST
@@ -200,6 +209,7 @@ class IndexedText(object):
         self.index = nltk.Index((self.stem(word), i)
                          for (i, word) in enumerate(self.tokens))
         self.tokens_without_stopwords = self.remove_stopwords()
+        self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
 
     def get_text_sentences(self):
         """returns sentences from a text"""
