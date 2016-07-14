@@ -25,14 +25,22 @@ Then install python dependencies using pip.
 ```bash
 $ pip3 install nltk
 $ pip3 install python-dateutil
+$ pip3 install treetaggerwrapper
 ```
 
-For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running:
+For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running the install commands. Like so:
 ```bash
+$ cd tagger
 $ sh install-tagger.sh
 $ echo 'Hello world!' | cmd/tree-tagger-french
+    reading parameters ...
+    tagging ...
+Hello   INT hello
+world   NOM <unknown>
+!   SENT    !
+     finished.
 ```
-If you get results from the second command it was successful. You should be set up for things.
+If you get results like this from the third command it was successful. You should be set up for things.
 
 # Usage
 Individual scripts can be created for a particular purpose by modifying the main() function in main.py. By default, it outputs a series of basic statistics about the corpus to the file results.txt when run as a program. 
