@@ -196,7 +196,7 @@ class Corpus(object):
                 num_tokens_on_first_page = text.find_page_breaks()
                 total_tokens = (len(text.bigrams) + 1)
                 percentage_on_first_page = (num_tokens_on_first_page / total_tokens) * 100
-                print(text.filename + "," + str(num_tokens_on_first_page) + "," + str(percentage_on_first_page))
+                print(text.date + "," + text.publication + "," + str(num_tokens_on_first_page) + "," + str(percentage_on_first_page))
             except:
                 # if there are no page breaks, pass this article
                 pass
