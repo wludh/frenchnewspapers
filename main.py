@@ -2,7 +2,7 @@
 
 import nltk
 from nltk import word_tokenize, FreqDist, PorterStemmer
-from treetagger import TreeTagger
+import treetaggerwrapper
 import nltk.data
 from nltk.corpus import stopwords, names
 from nltk.stem.snowball import SnowballStemmer
@@ -210,7 +210,9 @@ class IndexedText(object):
         self.text = self.read_text()
         self.sentences = self.get_text_sentences()
         self.tokens = self.flatten_sentences()
-        self.tagged_tokens = self.tag_tokens()
+        self.tree_tagged_tokens = self.get_tree_tagged_tokens()
+        self.tagged_tokens = [(foo.word, foo.pos) for foo in self.tree_tagged_tokens]
+        self.stems = [foo.lemma for foo in self.tree_tagged_tokens]
         self.bigrams = list(nltk.bigrams(self.tokens))
         self.trigrams = list(nltk.trigrams(self.tokens))
         self.length = len(self.tokens)
@@ -226,9 +228,11 @@ class IndexedText(object):
         self.tokens_without_stopwords = self.remove_stopwords()
         self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
 
-    def tag_tokens(self):
+    def get_tree_tagged_tokens(self):
         """takes the tokens and tags them"""
-        # tt = TreeTagger(language='french')
+        # might be able to pass it the directory in your current folder. so TAGDIR would = tagger
+        tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='/opt/treetagger/')
+        return treetaggerwrapper.make_tags(tagger.tag_text(self.tokens))
 
     def find_page_breaks(self):
         """take bigrams and return indexs of page breaks for a text"""
