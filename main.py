@@ -342,6 +342,15 @@ class IndexedText(object):
         stem = treetaggerwrapper.make_tags(self.tagger.tag_text(token))[0].lemma
         return FreqDist(self.stems)[stem]
 
+    def count_conjunctions(self):
+        tagged_tokens = self.tagged_tokens
+        counter = 0
+        for index, (token, tag) in enumerate(tagged_tokens):
+            if tag == 'KON':
+                print(token + ": " + ' '.join(self.tokens[index-3:index+3]))
+                counter += 1
+        return counter
+
 def main():
     """Main function to be called when the script is called"""
     corpus = Corpus()
