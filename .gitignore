@@ -9,3 +9,4 @@ results.csv
 env/
 tagger/
 treetagger-python/
+processed/

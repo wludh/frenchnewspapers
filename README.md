@@ -20,12 +20,19 @@ Then use homebrew to install python3:
 ```bash
 $ brew install python3
 ```
-Then install dependencies using pip.
+Then install python dependencies using pip.
 
 ```bash
 $ pip3 install nltk
 $ pip3 install python-dateutil
 ```
+
+For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running:
+```bash
+$ sh install-tagger.sh
+$ echo 'Hello world!' | cmd/tree-tagger-french
+```
+If you get results from the second command it was successful. You should be set up for things.
 
 # Usage
 Individual scripts can be created for a particular purpose by modifying the main() function in main.py. By default, it outputs a series of basic statistics about the corpus to the file results.txt when run as a program. 
@@ -92,6 +99,8 @@ I've baked in a variety of methods, some tied to the corpus itself:
     >>> my_text.tokens
     ['l', "'", 'affaire', 'steinheil', 'les', 'découvertes', 'd', "'", 'hier', 'nous', 'ne', 'nous', 'trompions', 'pas', 'en', 'annonçant', 'que', 'la', 'perquisition', ...
     ```
+* corpus.preprocess_for_topic_modeling():
+    * creates a new folder containing copies of the texts, but all the tokens are stemmed. in case we want to try topic modeling those instead.
 
 Others are tied to the individual texts:
 
@@ -101,6 +110,12 @@ Others are tied to the individual texts:
     * give unprocessed text (includes line breaks, etc.)
 * text.tokens
     * give tokenized version of a text
+* text.tree_tagged_tokens
+    * gives a list of tag objects according to tree tagger, which contains word, pos, and lemma. Using this to create the tagged_tokens and stems attributes.
+* text.tagged_tokens
+    * gives a list of tuple pairs with (token, part of speech tag)
+* text.stems
+    * gives a list of the text's tokens converted to stems
 * text.length
     * give the length of a text (number of tokens)
 * text.fd

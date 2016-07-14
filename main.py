@@ -55,6 +55,16 @@ class Corpus(object):
                     texts.append(IndexedText(os.path.join(root, fn)))
         return texts
 
+    def preprocess_for_topic_modeling(self):
+        """stem the corpus so that you can pre-process for topic modeling"""
+        if not os.path.exists('processed'):
+            os.makedirs('processed')
+
+        for text in self.texts:
+            with open('processed/' + text.filename + '.txt', 'w') as current_text:
+                current_text.write(' '.join(text.stems))
+
+
     def tokens_by_publication_cfd(self):
         cfd = nltk.ConditionalFreqDist(
             (text.publication, word)
@@ -230,8 +240,7 @@ class IndexedText(object):
 
     def get_tree_tagged_tokens(self):
         """takes the tokens and tags them"""
-        # might be able to pass it the directory in your current folder. so TAGDIR would = tagger
-        tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='/opt/treetagger/')
+        tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='tagger')
         return treetaggerwrapper.make_tags(tagger.tag_text(self.tokens))
 
     def find_page_breaks(self):
