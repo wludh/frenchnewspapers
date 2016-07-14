@@ -126,8 +126,12 @@ Others are tied to the individual texts:
     * give the name of the journal that published the text.
 * text.stemmer
     * produces a French stemmer for the text (not fully implemented yet)
+* text.token_count('token')
+    * gives you the number of times that exact token occurs in the text. will not catch plural forms or alternative verb conjugations.
+* text.stemmed_token_count('token')
+    * stems the token and then gets the number of times that stem occurs in the text. So it will catch plural vs singular and verb conjugations.
 * text.index
-    * produces a stemmed index for the text (not fully implemented yet)
+    * produces a stemmed index for the text. (mostly deprecated, since we're using a different stemmer now.)
 * text.tokens_without_stopwords
     * produces a list of tokens in the text with stopwords excluded.
 * text.bigrams

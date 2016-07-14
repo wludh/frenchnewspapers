@@ -220,6 +220,7 @@ class IndexedText(object):
         self.text = self.read_text()
         self.sentences = self.get_text_sentences()
         self.tokens = self.flatten_sentences()
+        self.tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='tagger')
         self.tree_tagged_tokens = self.get_tree_tagged_tokens()
         self.tagged_tokens = [(foo.word, foo.pos) for foo in self.tree_tagged_tokens]
         self.stems = [foo.lemma for foo in self.tree_tagged_tokens]
@@ -240,7 +241,7 @@ class IndexedText(object):
 
     def get_tree_tagged_tokens(self):
         """takes the tokens and tags them"""
-        tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='tagger')
+        tagger = self.tagger
         return treetaggerwrapper.make_tags(tagger.tag_text(self.tokens))
 
     def find_page_breaks(self):
@@ -337,6 +338,9 @@ class IndexedText(object):
         """takes a token and returns the counts for it in the text."""
         return self.fd[token]
 
+    def stemmed_token_count(self, token):
+        stem = treetaggerwrapper.make_tags(self.tagger.tag_text(token))[0].lemma
+        return FreqDist(self.stems)[stem]
 
 def main():
     """Main function to be called when the script is called"""
