@@ -2,6 +2,7 @@
 
 import nltk
 from nltk import word_tokenize, FreqDist, PorterStemmer
+from treetagger import TreeTagger
 import nltk.data
 from nltk.corpus import stopwords, names
 from nltk.stem.snowball import SnowballStemmer
@@ -187,6 +188,19 @@ class Corpus(object):
             if text.filename == name:
                 return text
 
+    def find_percentages_on_first_page(self):
+        """prints out the number of tokens on the first page of an article as well as the percentage of total tokens"""
+        print("filename" + "," + "tokens on first page" + "," + "percentage on first page")
+        for text in self.texts:
+            try:
+                num_tokens_on_first_page = text.find_page_breaks()
+                total_tokens = (len(text.bigrams) + 1)
+                percentage_on_first_page = (num_tokens_on_first_page / total_tokens) * 100
+                print(text.filename + "," + str(num_tokens_on_first_page) + "," + str(percentage_on_first_page))
+            except:
+                # if there are no page breaks, pass this article
+                pass
+
 
 class IndexedText(object):
     """Text object"""
@@ -196,6 +210,7 @@ class IndexedText(object):
         self.text = self.read_text()
         self.sentences = self.get_text_sentences()
         self.tokens = self.flatten_sentences()
+        self.tagged_tokens = self.tag_tokens()
         self.bigrams = list(nltk.bigrams(self.tokens))
         self.trigrams = list(nltk.trigrams(self.tokens))
         self.length = len(self.tokens)
@@ -210,6 +225,20 @@ class IndexedText(object):
                          for (i, word) in enumerate(self.tokens))
         self.tokens_without_stopwords = self.remove_stopwords()
         self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
+
+    def tag_tokens(self):
+        """takes the tokens and tags them"""
+        # tt = TreeTagger(language='french')
+
+    def find_page_breaks(self):
+        """take bigrams and return indexs of page breaks for a text"""
+        # page_breaks = []
+        return self.bigrams.index(('page', 'break'))
+        # for index, bigram in enumerate(self.bigrams):
+            # this will grab all indices
+            # if bigram == ('page', 'break'):
+            #     page_breaks.append(index)
+        # return page_breaks
 
     def get_text_sentences(self):
         """returns sentences from a text"""
