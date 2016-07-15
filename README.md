@@ -28,7 +28,7 @@ $ pip3 install python-dateutil
 $ pip3 install treetaggerwrapper
 ```
 
-For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running the install commands. Like so:
+For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves downloading four files from that link, but be careful that you don't unzip anything yourself. The installation script will do that for you. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running the install commands. Like so:
 ```bash
 $ cd tagger
 $ sh install-tagger.sh
