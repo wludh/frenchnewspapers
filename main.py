@@ -223,7 +223,7 @@ class IndexedText(object):
         #self.tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='tagger')
         #self.tree_tagged_tokens = self.get_tree_tagged_tokens()
         #self.tagged_tokens = [(foo.word, foo.pos) for foo in self.tree_tagged_tokens]
-        self.stems = [foo.lemma for foo in self.tree_tagged_tokens]
+        #self.stems = [foo.lemma for foo in self.tree_tagged_tokens]
         self.bigrams = list(nltk.bigrams(self.tokens))
         self.trigrams = list(nltk.trigrams(self.tokens))
         self.length = len(self.tokens)
