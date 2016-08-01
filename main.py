@@ -199,7 +199,8 @@ class Corpus(object):
                 return text
 
     def find_percentages_on_first_page(self):
-        """prints out the number of tokens on the first page of an article as well as the percentage of total tokens"""
+        """prints out the number of tokens on the first page of
+        an article as well as the percentage of total tokens"""
         print("filename" + "," + "tokens on first page" + "," + "percentage on first page")
         for text in self.texts:
             try:
@@ -216,8 +217,52 @@ class Corpus(object):
         for text in self.texts:
             conjunctions = FreqDist([tag for token, tag in text.tagged_tokens])
             conjunction_count = conjunctions['KON']
-            print(text.date + ',' + text.publication + "," + str(conjunction_count))
+            normalized_conjunction_count = conjunction_count/len(text.tokens)
+            print(text.date + ',' + text.publication + "," + str(normalized_conjunction_count))
 
+    def dispersion_plots(self, character_or_token, file_name, bin_count=500):
+        """\
+        given a character or token and a filename to output the things to, produce a scatterplot of the output
+        """
+
+        fig, axes = plt.subplots(len(self.texts), 1, squeeze=True)
+        fig.set_figheight(9.4)
+        for (text, ax) in zip(self.texts, axes):
+            print(text.filename)
+            matches = list(re.finditer(character_or_token, text.text))
+            locations = [m.start() for m in matches]
+            n, bins = np.histogram(locations, bin_count)
+
+            # fig.suptitle(text.filename, fontsize=14, fontweight='bold')
+            left = np.array(bins[:-1])
+            right = np.array(bins[1:])
+            bottom = np.zeros(len(left))
+            top = bottom + n
+
+            XY = np.array(
+                [[left, left, right, right], [bottom, top, top, bottom]]
+            ).T
+
+            barpath = path.Path.make_compound_path_from_polys(XY)
+
+            patch = patches.PathPatch(
+                barpath, facecolor='blue', edgecolor='gray', alpha=0.8,
+                )
+
+            ax.set_xlim(left[0], right[-1])
+            ax.set_ylim(bottom.min(), top.max())
+            ax.xaxis.set_visible(False)
+            ax.yaxis.set_visible(False)
+            # plt.axis('off')
+            ax.add_patch(patch)
+
+            # ax.set_xlabel('Position in Text, Measured by Character')
+            # ax.set_ylabel('Number of Quotations')
+
+        output = os.path.join(file_name + '.png')
+        print('writing to {}'.format(output))
+        plt.savefig(output, transparent=True)
+        plt.show()
 
 class IndexedText(object):
     """Text object"""
