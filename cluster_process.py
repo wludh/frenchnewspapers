@@ -71,6 +71,9 @@ class ProcCorpus:
                     if tag_filter == 'VER':
                         if x.pos[0:3] == tag_filter:
                             to_write.append(x.lemma)
+                    elif tag_filter == 'PRO':
+                        if x.pos[0:3] == tag_filter:
+                            to_write.append(x.lemma)
                     # if working on punctuation only, sub
                     elif tag_filter == '!?' or tag_filter == '?!':
                         mappings = {'!': 'exclamation', '?':'question'}
