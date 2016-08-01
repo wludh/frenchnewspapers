@@ -61,15 +61,26 @@ class ProcCorpus:
         corpus = french_main.Corpus()
         print([text.filename for text in corpus.texts])
         corpus.group_articles_by_publication()
-        print([text.filename for text in corpus.texts])
         for text in corpus.texts:
             to_write = []
             with open(processed_dir + '/' + text.filename + '.txt', 'w') as current_text:
                 for x in text.tree_tagged_tokens:
+                    # your if statement here is a bit wonky
                     # something special for verbs, we want
                     # to collapse all verb tenses together.
                     if tag_filter == 'VER':
                         if x.pos[0:3] == tag_filter:
+                            to_write.append(x.lemma)
+                    # if working on punctuation only, sub
+                    elif tag_filter == '!?' or tag_filter == '?!':
+                        mappings = {'!': 'exclamation', '?':'question'}
+                        if x.lemma in mappings:
+                            to_write.append(mappings[x.lemma])
+                    elif (tag_filter == 'PUN' or tag_filter == 'SENT') and (x.pos == 'PUN' or x.pos == 'SENT'):
+                        mappings = {',': 'comma', '(': 'open_paren', ':': 'colon', '\'': 'apostrophe', '-': 'dash', ';': 'semi-colon', '/': 'forward_slash', '!': 'exclamation', '?': 'question', '.': 'period'}
+                        if x.lemma in mappings:
+                            to_write.append(mappings[x.lemma])
+                        else:
                             to_write.append(x.lemma)
                     elif x.pos == tag_filter:
                         to_write.append(x.lemma)
@@ -111,15 +122,26 @@ class ProcCorpus:
         labels = self.parse_names()
         tfs = self.produce_tfidfs()
         # will try and slot them into the nclusters
-        fitted = KMeans(n_clusters=5).fit(tfs)
+        try:
+            fitted = KMeans(n_clusters=5).fit(tfs)
+        except ValueError:
+            fitted = KMeans(n_clusters=2).fit(tfs)
         classes = fitted.predict(tfs)
-        sklearn = PCA(n_components=5)
-        sklearn_transf = sklearn.fit_transform(tfs.toarray())
+        try:
+            sklearn = PCA(n_components=5)
+        except ValueError:
+            sklearn = PCA(n_components=2)
+        try:
+            sklearn_transf = sklearn.fit_transform(tfs.toarray())
+        except:
+            sklearn_transf = PCA(n_components=2).fit_transform(tfs.toarray())
         plt.scatter(sklearn_transf[:, 0],
                     sklearn_transf[:, 1], c=classes, s=35)
         for i in range(len(classes)):
             plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=labels[i])
         # plt.show()
+        if not os.path.exists(ARGS.results_folder):
+            os.makedirs(ARGS.results_folder)
         plt.savefig(ARGS.results_folder + '/' + ARGS.tag_filter + '.png')
 
     def parse_names(self):
@@ -128,10 +150,12 @@ class ProcCorpus:
             clean_key = re.sub(r'processed\/|\.txt', '', key)
             split_key = re.split(r'_', clean_key)
             parsed_key = MetaData(' '.join(split_key[:-3]), split_key[-3], split_key[-2], split_key[-1])
-            pub_mapping_dict = {'croix': 'c', 'figaro': 'f', 'humanite': 'h', 'intransigeant': 'i', 'journal': 'j',
-                'matin': 'm', 'petit journal': 'pj',
-                'petit parisien': 'pp', 'radical': 'r',
-                'temps': 't'}
+            pub_mapping_dict = {'croix': 'c', 'figaro': 'f',
+                                'humanite': 'h', 'intransigeant': 'i',
+                                'journal': 'j',
+                                'matin': 'm', 'petit journal': 'pj',
+                                'petit parisien': 'pp', 'radical': 'r',
+                                'temps': 't'}
             # 1: June 1908
             # 2: Nov. 1908
             # 3: and Nov 1909
