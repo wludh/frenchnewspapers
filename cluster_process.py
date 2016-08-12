@@ -46,19 +46,21 @@ def parse_args(argv=None):
                         help="""the folder containing a corpus of
                          other texts tagged for genre.""")
     parser.add_argument('-g', '--genre_compare', dest='genre_compare',
-                        action='store', default=True,
+                        action='store', default="True",
                         help="""true/false - whether you are
                          comparing against a genre corpus.""")
 
     return parser.parse_args(argv)
 
 ARGS = parse_args()
+print(ARGS.genre_compare)
 
 
 class ProcCorpus:
     """the object for the processed text"""
     def __init__(self):
         args = ARGS
+        print(args.genre_compare)
         self.process_corpus(args)
         self.filenames = self.generate_filenames(args)
         self.texts = self.read_texts()
@@ -73,14 +75,21 @@ class ProcCorpus:
         os.makedirs(processed_dir)
 
         corpus = french_main.Corpus()
-        genre_corpus = french_main.GenreCorpus()
-        print([text.filename for text in corpus.texts])
+        if args.genre_compare == "True" and os.path.exists('genre_corpus'):
+            genre_corpus = french_main.GenreCorpus()
+        elif args.genre_compare == "True":
+            raise ValueError("""Error: specified genre clustering but
+                 genre_corpus/ directory does not exist.""")
+        else:
+            pass
         corpus.group_articles_by_publication()
         for text in corpus.texts:
             self.filter_tags(processed_dir, tag_filter, text)
 
-        for text in genre_corpus.texts:
-            self.filter_tags(processed_dir, tag_filter, text, genre_text=True)
+        if args.genre_compare == "True":
+            for text in genre_corpus.texts:
+                self.filter_tags(processed_dir, tag_filter,
+                                 text, genre_text=True)
 
     def filter_text(self, processed_dir, tag_filter, text, genre_text=False):
         """filters a single text based on part of speech"""
@@ -120,7 +129,7 @@ class ProcCorpus:
         """filters parts of speech"""
         print('processing ' + text.filename)
         to_write = self.filter_text(processed_dir, tag_filter, text)
-        chunk_size = 1000
+        chunk_size = 2000
         if genre_text:
             i = 1
             total_tokens = len(to_write)
@@ -189,9 +198,9 @@ class ProcCorpus:
         # plt.show()
         if not os.path.exists(ARGS.results_folder):
             os.makedirs(ARGS.results_folder)
-        if ARGS.genre_compare:
+        if ARGS.genre_compare == "True":
             plt.savefig(ARGS.results_folder + '/' + ARGS.tag_filter +
-                        'with_genre_corpus' + '.png')
+                        '_with_genre_corpus' + '.png')
         else:
             plt.savefig(ARGS.results_folder + '/' + ARGS.tag_filter + '.png')
 
