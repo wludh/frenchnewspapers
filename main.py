@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import nltk
-from nltk import word_tokenize, FreqDist, PorterStemmer
+from nltk import FreqDist
 import treetaggerwrapper
 import nltk.data
 from nltk.corpus import stopwords, names
@@ -402,6 +402,51 @@ class IndexedText(object):
                 print(token + ": " + ' '.join(self.tokens[index-3:index+3]))
                 counter += 1
         return counter
+
+
+class GenreText(IndexedText):
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.filename = re.sub(r'^.*/|_clean\.txt|_Clean\.txt|\.txt', '', os.path.basename(filepath)).lower()
+        self.text = self.read_text()
+        self.genre = re.split(r'_', self.filename)[1]
+        self.sentences = self.get_text_sentences()
+        self.tokens = self.flatten_sentences()
+        self.tagger = treetaggerwrapper.TreeTagger(TAGLANG='fr', TAGDIR='tagger')
+        self.tree_tagged_tokens = self.get_tree_tagged_tokens()
+        self.tagged_tokens = [(foo.word, foo.pos) for foo in self.tree_tagged_tokens]
+        self.stems = [foo.lemma for foo in self.tree_tagged_tokens]
+        self.bigrams = list(nltk.bigrams(self.tokens))
+        self.trigrams = list(nltk.trigrams(self.tokens))
+        self.length = len(self.tokens)
+        self.fd = FreqDist(self.tokens)
+        self.stemmer = SnowballStemmer('french')
+        self.index = nltk.Index((self.stem(word), i)
+                         for (i, word) in enumerate(self.tokens))
+        self.tokens_without_stopwords = self.remove_stopwords()
+        self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
+
+
+class GenreCorpus(Corpus):
+    """specialized object for genre texts"""
+
+    def __init__(self, genre_corpus_dir='genre_corpus'):
+        self.corpus_dir = genre_corpus_dir
+        self.stopwords = self.generate_stopwords()
+        self.names_list = self.generate_names_list()
+        self.texts = self.build_corpus()
+
+    def build_corpus(self):
+        """given a corpus directory, make indexed text objects from it"""
+        texts = []
+        for (root, _, files) in os.walk(self.corpus_dir):
+            for fn in files:
+                if fn[0] == '.':
+                    pass
+                else:
+                    texts.append(GenreText(os.path.join(root, fn)))
+        return texts
+
 
 def main():
     """Main function to be called when the script is called"""

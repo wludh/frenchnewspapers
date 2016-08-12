@@ -10,3 +10,12 @@ env/
 tagger/
 treetagger-python/
 processed/
+test_corpus/
+test_processed/
+question_by_publication.png
+question_by_date.png
+normalized_conjunctions.csv
+genre_corpus/
+exclamation_by*
+clustering_results/
+conjunctions.csv
