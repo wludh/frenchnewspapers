@@ -183,6 +183,7 @@ $ git pull
 
 ## Clustering
 To preform cluster analysis, type:
+```bash
 $ python3 cluster_process.py -t 'VER'
-
+```
 Where 'VER' will do verbs, you can insert any part of speech tag abbreviation. 
