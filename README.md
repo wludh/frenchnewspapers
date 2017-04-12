@@ -180,3 +180,9 @@ And a final note: be sure to re-sync your computer's copy of the repository with
 ```bash
 $ git pull
 ```
+
+## Clustering
+To preform cluster analysis, type:
+$ python3 cluster_process.py -t 'VER'
+
+Where 'VER' will do verbs, you can insert any part of speech tag abbreviation. 
