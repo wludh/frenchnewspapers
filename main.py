@@ -13,6 +13,12 @@ import csv
 import operator
 import datetime
 import dateutil.parser
+import matplotlib.pyplot as plt
+plt.rcdefaults()
+import numpy as np
+from matplotlib.pyplot import figure, show
+from matplotlib.ticker import MaxNLocator
+
 
 # TODO: stemming. will need to follow the example
 # TODO:
@@ -30,6 +36,12 @@ import dateutil.parser
 CORPUS = 'clean_ocr'
 STOPWORD_LIST = []
 LIST_OF_NAMES = []
+
+
+
+plt.rcdefaults()
+fig, ax = plt.subplots()
+
 
 
 class Corpus(object):
@@ -380,6 +392,103 @@ class IndexedText(object):
             count = str(fd[mark])
             results.append("%(mark)s, %(count)s" % locals())
         return(results)
+
+
+    def puncbysection_indiv(self):
+
+## This function creates charts of the frequency of all punctuation marks in all subdivisions of the text.
+## The character count of all of the subdivisions can be modified in the definition for the variable 'parts'
+        plt.rcdefaults()
+        fig, ax = plt.subplots()
+
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+
+        y_pos = np.arange(len(punctuation_marks))
+        thetext = self.text
+        parts = [thetext[i:i+1000] for i in range(0, len(thetext), 1000)]
+
+
+        for q in range(0, len(parts)):
+            thnumber = str(q + 1)
+            newthing = parts[q]
+            newthing = re.findall(r"[\w]+|[^\s\w]", newthing)
+            occur = []
+
+
+            for i in range(0, len(punctuation_marks)):
+                z=0
+                for x in range(0, len(newthing)):
+                    if punctuation_marks[i] == newthing[x]:
+                        z = z+1
+                occur.append(z)
+        
+            y_pos = np.arange(len(punctuation_marks))
+
+            plt.barh(y_pos, occur, align='center', alpha=0.5)
+            plt.yticks(y_pos, punctuation_marks)
+            plt.xlabel('Occur')
+            plt.title('Punctuation marks in section #' + thnumber + " of text")
+            plt.show()
+
+
+    def puncbysection_total(self):
+        
+## This function plots the appears of a given punctuation mark over the course of an entire text.
+
+
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+        mark = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ... ")
+        for i in range (0, len(punctuation_marks)):
+
+            if mark == punctuation_marks[i]:
+
+
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+
+    ##The 500 character count can be changed depending on how long one wants the length of each
+    ## subdivisions to be
+                totaltally =[]
+                
+                for q in range(0, len(parts)):
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    totaltally.append(z)
+                        
+                    y_pos = np.arange(len(punctuation_marks[i]))
+                
+                noofsectionsforxaxis = []
+
+                newvari = punctuation_marks[i]
+
+                for i in range (0, len(totaltally)):
+                    addedone = i + 1
+                    noofsectionsforxaxis.append(addedone)
+
+                totaltally.sort(reverse=True)
+
+        plt.rcdefaults()
+        fig, ax = plt.subplots()       
+        ax = figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(noofsectionsforxaxis, totaltally)
+        plt.axis([1, len(noofsectionsforxaxis), 0, totaltally[0]])
+        ax.set_xlabel('Chronological textual subdivision #')
+        ax.set_title('The Punctuation Mark ' + newvari + ' Over the Course of Text')
+        ax.set_ylabel('The number of occurrences of ' + newvari)
+        plt.show()
+        
+
+
+    
+
 
     def most_common(self):
         """takes a series of tokens and returns most common 50 words."""
