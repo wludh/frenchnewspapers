@@ -230,7 +230,7 @@ class ProcCorpus:
             for key in date_to_symbol.keys():
                 if dates[i] == key:
                     for key in journal_to_color.keys():
-                        if labels[i] == key:
+                        if labels[i] == key and key in journal_to_color.keys():
                             plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker=date_to_symbol[key], markersize=4, color=journal_to_color[key], zorder=1)
 
 
