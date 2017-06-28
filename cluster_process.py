@@ -187,8 +187,8 @@ class ProcCorpus:
         except ValueError:
             fitted = KMeans(n_clusters=2).fit(tfs)
         classes = fitted.predict(tfs)
-    
-    
+
+
         try:
             sklearn = PCA(n_components=5)
 
@@ -206,62 +206,35 @@ class ProcCorpus:
 ## https://stackoverflow.com/questions/17682216/scatter-plot-and-color-mapping-in-python
 ## A color coded key, corresponding to a custom color map to get rid of some of the excess text,
 ## yet still have the labels?
-        
+
         legendlabels = []
+        date_to_color = {
+            'intransigeant': 'red',
+            'croix': 'black',
+            'petit parisien': 'blue',
+            'radical': 'green',
+            'matin': 'purple',
+            'humanite': 'orange',
+            'temps': 'yellow',
+            'journal': 'grey'
+        }
+
 
         for i in range(len(classes)):
             plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=" ")
 
             if dates[i] == "1909":
-
-                if labels[i] == "intransigeant":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="red", zorder=1)
-                    redx = [labels[i] + " " + dates[i]]
-                    legendlabels.append(redx)
-                    
-                    
-                elif labels[i] == "croix":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="black", zorder=1)
-                    blackx = [labels[i] + " " + dates[i]]
-                    legendlabels.append(blackx)
-    
-
-                elif labels[i] == "petit parisien":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="blue", zorder=1)
-                    bluex = [labels[i] + " " + dates[i]]
-                    legendlabels.append(bluex)
-
-                elif labels[i] == "radical":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="green", zorder=1)
-                    greenx = [labels[i] + " " + dates[i]]
-
-                    legendlabels.append(greenx)
-
-
-                elif labels[i] == "matin":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="purple", zorder=1)
-                    purplex = [labels[i] + " " + dates[i]]
-
-                    legendlabels.append(purplex)
-
-
-                elif labels[i] == "humanite":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="orange", zorder=1)
-                    orangex = [labels[i] + " " + dates[i]]
-
-                    legendlabels.append(orangex)
-
-                elif labels[i] == "temps":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="yellow", zorder=1)
-                    yellowx = [labels[i] + " " + dates[i]]
-
-                    legendlabels.append(yellowx)
-
-                elif labels[i] == "journal":
-                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="grey", zorder=1)
-                    greyx = [labels[i] + " " + dates[i]]
-
-                    legendlabels.append(greyx)
+                for key in date_to_color.keys():
+                    if labels[i] == key:
+                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color=date_to_color[key], zorder=1)
+            elif dates[i] == 'November, 1908':
+                for key in date_to_color.keys():
+                    if labels[i] == key:
+                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='D', markersize=4, color=date_to_color[key], zorder=1)
+            elif dates[i] = 'June, 1908':
+                for key in date_to_color.keys():
+                    if labels[i] == key:
+                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='*', markersize=4, color=date_to_color[key], zorder=1)
 
 
 
@@ -271,30 +244,30 @@ class ProcCorpus:
 #        symbol_legend = plt.legend(handles=[symbol1], loc=3)
 
 #        ax = plt.gca().add_artist(symbol_legend)
-    
+
 
         red_patch = mpatches.Patch(color='yellow', label='Le Parisien')
         purple_patch = mpatches.Patch(color='purple', label='Matin')
         orange_patch = mpatches.Patch(color='orange', label='Humanite')
         green_patch = mpatches.Patch(color='green', label='Radical')
         blue_patch = mpatches.Patch(color='blue', label='Petit Parisien')
-        
+
         plt.legend(handles=[red_patch , purple_patch, orange_patch, green_patch, blue_patch], loc=1, ncol=3)
         #plt.legend(legendlabels)
-            
+
         newlegendlabels = []
         for i in range(0, len(legendlabels)):
             if i > 0:
                 x = i - 1
                 if legendlabels[i] != legendlabels[x]:
                     newlegendlabels.append(legendlabels[i])
-        
+
 #        plt.legend(newlegendlabels)
 
 
 
 
-            
+
         # plt.show()
         if not os.path.exists(ARGS.results_folder):
             os.makedirs(ARGS.results_folder)
@@ -390,16 +363,16 @@ class ProcCorpus:
                     print(parsed_key)
                     result = 'SOMETHING HAS GONE WRONG'
 
-                    
+
                 # ['journal_key', 'date_key']
                 global jrnal
                 jrnal = []
                 jrnal.append(result.journal_key)
-                
+
                 keys.append(result.journal_key)
 
 
-                
+
         return keys
 
     def parse_shapes(self):
