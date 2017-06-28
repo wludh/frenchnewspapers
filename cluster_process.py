@@ -208,7 +208,7 @@ class ProcCorpus:
 ## yet still have the labels?
 
         legendlabels = []
-        date_to_color = {
+        journal_to_color = {
             'intransigeant': 'red',
             'croix': 'black',
             'petit parisien': 'blue',
@@ -219,22 +219,20 @@ class ProcCorpus:
             'journal': 'grey'
         }
 
+        date_to_symbol = {
+            '1909': 'x',
+            'November, 1908': 'D',
+            'June, 1908': '*'
+        }
 
         for i in range(len(classes)):
             plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=" ")
+            for key in date_to_symbol.keys():
+                if dates[i] == key:
+                    for key in journal_to_color.keys():
+                        if labels[i] == key:
+                            plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker=date_to_symbol[key], markersize=4, color=journal_to_color[key], zorder=1)
 
-            if dates[i] == "1909":
-                for key in date_to_color.keys():
-                    if labels[i] == key:
-                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color=date_to_color[key], zorder=1)
-            elif dates[i] == 'November, 1908':
-                for key in date_to_color.keys():
-                    if labels[i] == key:
-                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='D', markersize=4, color=date_to_color[key], zorder=1)
-            elif dates[i] = 'June, 1908':
-                for key in date_to_color.keys():
-                    if labels[i] == key:
-                        plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='*', markersize=4, color=date_to_color[key], zorder=1)
 
 
 
