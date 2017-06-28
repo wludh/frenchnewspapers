@@ -11,6 +11,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from collections import namedtuple
+import matplotlib.cm as cm
+import matplotlib.patches as mpatches
+
 
 # CORPUS = 'processed'
 MetaData = namedtuple('MetaData',
@@ -176,6 +179,7 @@ class ProcCorpus:
 
     def graph_clusters(self, args=ARGS):
         labels = self.parse_names()
+        dates = self.parse_dates()
         tfs = self.produce_tfidfs()
         # will try and slot them into the nclusters
         try:
@@ -183,8 +187,12 @@ class ProcCorpus:
         except ValueError:
             fitted = KMeans(n_clusters=2).fit(tfs)
         classes = fitted.predict(tfs)
+    
+    
         try:
             sklearn = PCA(n_components=5)
+
+            ##^the number of clusters
         except ValueError:
             sklearn = PCA(n_components=2)
         try:
@@ -192,9 +200,101 @@ class ProcCorpus:
         except:
             sklearn_transf = PCA(n_components=2).fit_transform(tfs.toarray())
         plt.scatter(sklearn_transf[:, 0],
-                    sklearn_transf[:, 1], c=classes, s=35)
+                    sklearn_transf[:, 1], c=classes, s=25, cmap=cm.Pastel1)
+
+## Color maps https://stackoverflow.com/questions/17682216/scatter-plot-and-color-mapping-in-python
+## https://stackoverflow.com/questions/17682216/scatter-plot-and-color-mapping-in-python
+## A color coded key, corresponding to a custom color map to get rid of some of the excess text,
+## yet still have the labels?
+        
+        legendlabels = []
+
         for i in range(len(classes)):
-            plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=labels[i])
+            plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=" ")
+
+            if dates[i] == "1909":
+
+                if labels[i] == "intransigeant":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="red", zorder=1)
+                    redx = [labels[i] + " " + dates[i]]
+                    legendlabels.append(redx)
+                    
+                    
+                elif labels[i] == "croix":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="black", zorder=1)
+                    blackx = [labels[i] + " " + dates[i]]
+                    legendlabels.append(blackx)
+    
+
+                elif labels[i] == "petit parisien":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="blue", zorder=1)
+                    bluex = [labels[i] + " " + dates[i]]
+                    legendlabels.append(bluex)
+
+                elif labels[i] == "radical":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="green", zorder=1)
+                    greenx = [labels[i] + " " + dates[i]]
+
+                    legendlabels.append(greenx)
+
+
+                elif labels[i] == "matin":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="purple", zorder=1)
+                    purplex = [labels[i] + " " + dates[i]]
+
+                    legendlabels.append(purplex)
+
+
+                elif labels[i] == "humanite":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="orange", zorder=1)
+                    orangex = [labels[i] + " " + dates[i]]
+
+                    legendlabels.append(orangex)
+
+                elif labels[i] == "temps":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="yellow", zorder=1)
+                    yellowx = [labels[i] + " " + dates[i]]
+
+                    legendlabels.append(yellowx)
+
+                elif labels[i] == "journal":
+                    plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker='x', markersize=4, color="grey", zorder=1)
+                    greyx = [labels[i] + " " + dates[i]]
+
+                    legendlabels.append(greyx)
+
+
+
+
+ #       symbol1 = mpatches.Patch(color='blue', marker='*', markersize=15, label='Blue stars')
+
+#        symbol_legend = plt.legend(handles=[symbol1], loc=3)
+
+#        ax = plt.gca().add_artist(symbol_legend)
+    
+
+        red_patch = mpatches.Patch(color='yellow', label='Le Parisien')
+        purple_patch = mpatches.Patch(color='purple', label='Matin')
+        orange_patch = mpatches.Patch(color='orange', label='Humanite')
+        green_patch = mpatches.Patch(color='green', label='Radical')
+        blue_patch = mpatches.Patch(color='blue', label='Petit Parisien')
+        
+        plt.legend(handles=[red_patch , purple_patch, orange_patch, green_patch, blue_patch], loc=1, ncol=3)
+        #plt.legend(legendlabels)
+            
+        newlegendlabels = []
+        for i in range(0, len(legendlabels)):
+            if i > 0:
+                x = i - 1
+                if legendlabels[i] != legendlabels[x]:
+                    newlegendlabels.append(legendlabels[i])
+        
+#        plt.legend(newlegendlabels)
+
+
+
+
+            
         # plt.show()
         if not os.path.exists(ARGS.results_folder):
             os.makedirs(ARGS.results_folder)
@@ -203,6 +303,48 @@ class ProcCorpus:
                         '_with_genre_corpus' + '.png')
         else:
             plt.savefig(ARGS.results_folder + '/' + ARGS.tag_filter + '.png')
+
+    def parse_dates(self):
+        keys = []
+        for key in self.texts.keys():
+
+            clean_key = re.sub(r'processed\/|\.txt|_chunk_[0-9]+\.txt',
+                               '', key)
+            split_key = re.split(r'_', clean_key)
+            if split_key[1] in ['sex', 'crime', 'corruption']:
+                split_key = re.split(r'_', clean_key)
+                parsed_key = GenreMetaData(split_key[0], split_key[1])
+                pub_mapping_dict = {'sex': 'x', 'crime': 'y',
+                                    'corruption': 'z'}
+                result = pub_mapping_dict[parsed_key.genre]
+                # ['journal_key', 'date_key']
+                keys.append(result)
+            else:
+                split_key = re.split(r'_', clean_key)
+                parsed_key = MetaData(' '.join(split_key[:-3]), split_key[-3],
+                                      split_key[-2], split_key[-1])
+                pub_mapping_dict = {'croix': 'croix', 'figaro': 'figaro',
+                                    'humanite': 'humanite', 'intransigeant': 'intransigeant',
+                                    'journal': 'journal',
+                                    'matin': 'matin', 'petit journal': 'petit journal',
+                                    'petit parisien': 'petit parisien', 'radical': 'radical',
+                                    'temps': 'temps'}
+                # 1: June 1908
+                # 2: Nov. 1908
+                # 3: and Nov 1909
+                if parsed_key.month == 'june' and parsed_key.year == '1908':
+                    result = ParsedMetaData(pub_mapping_dict[
+                        parsed_key.publication], 'June, 1908')
+                elif parsed_key.year == '1908' and \
+                        parsed_key.month == 'november':
+                    result = ParsedMetaData(pub_mapping_dict[
+                        parsed_key.publication], 'November, 1908')
+                elif parsed_key.year == '1909':
+                    result = ParsedMetaData(pub_mapping_dict[
+                        parsed_key.publication], '1909')
+
+                keys.append(result.date_key)
+        return keys
 
     def parse_names(self):
         keys = []
@@ -223,32 +365,41 @@ class ProcCorpus:
                 split_key = re.split(r'_', clean_key)
                 parsed_key = MetaData(' '.join(split_key[:-3]), split_key[-3],
                                       split_key[-2], split_key[-1])
-                pub_mapping_dict = {'croix': 'c', 'figaro': 'f',
-                                    'humanite': 'h', 'intransigeant': 'i',
-                                    'journal': 'j',
-                                    'matin': 'm', 'petit journal': 'pj',
-                                    'petit parisien': 'pp', 'radical': 'r',
-                                    'temps': 't'}
+                pub_mapping_dict = {'croix': 'croix', 'figaro': 'figaro',
+                                    'humanite': 'humanite', 'intransigeant': 'intransigeant',
+                                    'journal': 'journal',
+                                    'matin': 'matin', 'petit journal': 'petit journal',
+                                    'petit parisien': 'petit parisien', 'radical': 'radical',
+                                    'temps': 'temps'}
                 # 1: June 1908
                 # 2: Nov. 1908
                 # 3: and Nov 1909
                 if parsed_key.month == 'june' and parsed_key.year == '1908':
                     result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '1')
+                        parsed_key.publication], '-June, 1908')
                 elif parsed_key.year == '1908' and \
                         parsed_key.month == 'november':
                     result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '2')
+                        parsed_key.publication], '-November, 1908')
                 elif parsed_key.year == '1909':
                     result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '3')
+                        parsed_key.publication], '-1909')
                 else:
                     print(keys)
                     print(split_key)
                     print(parsed_key)
                     result = 'SOMETHING HAS GONE WRONG'
+
+                    
                 # ['journal_key', 'date_key']
-                keys.append(result.journal_key + result.date_key)
+                global jrnal
+                jrnal = []
+                jrnal.append(result.journal_key)
+                
+                keys.append(result.journal_key)
+
+
+                
         return keys
 
     def parse_shapes(self):

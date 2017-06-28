@@ -439,7 +439,7 @@ class IndexedText(object):
 
         punctuation_marks = ['»', '«', ',', '-', '.', '!',
                              "\"", ':', ';', '?', '...', '\'']
-        mark = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ... ")
+        mark = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ...  ' ")
         for i in range (0, len(punctuation_marks)):
 
             if mark == punctuation_marks[i]:
@@ -472,22 +472,101 @@ class IndexedText(object):
                     addedone = i + 1
                     noofsectionsforxaxis.append(addedone)
 
-                totaltally.sort(reverse=True)
-
-        plt.rcdefaults()
-        fig, ax = plt.subplots()       
+        ##plt.rcdefaults()
+        ##fig, ax = plt.subplots()       
         ax = figure().gca()
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         plt.plot(noofsectionsforxaxis, totaltally)
-        plt.axis([1, len(noofsectionsforxaxis), 0, totaltally[0]])
+        sortedtotaltally = totaltally
+        sortedtotaltally.sort(reverse=True)
+        heightofyaxis = sortedtotaltally[0] + 1
+        plt.axis([1, len(noofsectionsforxaxis), 0, heightofyaxis])
         ax.set_xlabel('Chronological textual subdivision #')
         ax.set_title('The Punctuation Mark ' + newvari + ' Over the Course of Text')
         ax.set_ylabel('The number of occurrences of ' + newvari)
+        plt.legend([mark])
         plt.show()
+
+    def multiple_punctuation(self):
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+
+        mark1 = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ... ")
+        mark2 = input("Enter the second punctuation mark.")
+        totaltally = []
+        newtotaltally = []
+        noofsectionsforxaxis = []
         
+        for i in range (0, len(punctuation_marks)):
+
+            if mark1 == punctuation_marks[i]:
+
+                y_pos = np.arange(len(punctuation_marks[i]))        
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+
+                for q in range(0, len(parts)):
+                    thnumber = str(q + 1)
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    totaltally.append(z)
+                        
+                    y_pos = np.arange(len(punctuation_marks[i]))
+            
+
+                newvari = punctuation_marks[i]
+
+                for i in range (0, len(totaltally)):
+                    addedone = i + 1
+                    noofsectionsforxaxis.append(addedone)
 
 
-    
+            elif mark2 == punctuation_marks[i]:
+
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+                
+                for q in range(0, len(parts)):
+                    thnumber = str(q + 1)
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    newtotaltally.append(z)
+        print (totaltally)
+        print (newtotaltally)
+                
+                
+        ax = figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(noofsectionsforxaxis, totaltally)
+        plt.plot(noofsectionsforxaxis, newtotaltally)
+        totaltallysizing = totaltally
+        totaltallysizing.sort(reverse=True)
+        newtotaltallysizing = newtotaltally
+        newtotaltally.sort(reverse=True)
+        if totaltallysizing[0] > newtotaltallysizing[0]:
+            yaxassign = totaltallysizing[0]
+            yaxassign = yaxassign + 1
+        else:
+            yaxassign = newtotaltallysizing[0]
+            yaxassign = yaxassign + 1
+        plt.axis([1, len(noofsectionsforxaxis), 0, yaxassign])
+        ax.set_xlabel('Chronological textual subdivisions')
+        ax.set_title('The Punctuation Mark ' + mark1 + " & " + mark2 + ' Over the Course of Text')
+        ax.set_ylabel('The number of occurrences of ' + mark1 + " and " + mark2)
+        plt.legend([mark1, mark2])
+        plt.show()
+
+                
 
 
     def most_common(self):
