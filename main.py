@@ -211,25 +211,24 @@ class Corpus(object):
     
     def lda(self):
         allthetokens = []
+        numberoftopics = int(input("Please enter the number of topics for the LDA."))
+        numberofwords = int(input("Please enter the number of words for each topic."))
         for text in self.texts:
-            allthetokens.append(text.tokens_without_stopwords)
- #           tws = text.tokens_without_stopwords
- #       flatlist = [item for sublist in allthetokens for item in sublist]
-## Working up untilthis point
- #       print (allthetokens)
+            currenttext = text.tokens_without_stopwords
+            textwithoutpunc = [word for word in currenttext if word.isalpha()]
+            allthetokens.append(textwithoutpunc)
+        print ("Please wait.  This could take some time...")
+
         dictionary = corpora.Dictionary(allthetokens)
         doc_term_matrix = [dictionary.doc2bow(doc) for doc in allthetokens]
         Lda = gensim.models.ldamodel.LdaModel
-        ldamodel = Lda(doc_term_matrix, num_topics=3, id2word = dictionary, passes=50)
-##current output: <gensim.models.ldamodel.LdaModel object at 0x11dd39470>
-        returnthis = ldamodel.print_topics(num_topics=3, num_words=3)
+        ldamodel = Lda(doc_term_matrix, num_topics=numberoftopics, id2word = dictionary, passes=50)
+        returnthis = ldamodel.print_topics(num_topics=numberoftopics, num_words=numberofwords)
         return returnthis
 
 ##Remaining issues: need to remove punctuation from allthetokens lists
 ## is tdf-if necessary before running lda??
-## this takes SO LONG to run..
-## It's working though-- yay!
-    
+
 
     def find_by_filename(self, name):
         """given a filename, return the text associated with it."""
@@ -640,6 +639,7 @@ class GenreText(IndexedText):
                          for (i, word) in enumerate(self.tokens))
         self.tokens_without_stopwords = self.remove_stopwords()
         self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
+
 
 
 class GenreCorpus(Corpus):
