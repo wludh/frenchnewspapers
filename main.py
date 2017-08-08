@@ -18,6 +18,9 @@ plt.rcdefaults()
 import numpy as np
 from matplotlib.pyplot import figure, show
 from matplotlib.ticker import MaxNLocator
+import gensim
+from gensim import corpora
+
 
 
 # TODO: stemming. will need to follow the example
@@ -128,6 +131,7 @@ class Corpus(object):
                          str(text.count_punctuation()) + '\n')
             output.write("Names: " + str(text.find_names()) + '\n')
 
+
     def sort_articles_by_date(self):
         """Takes the corpus and sorts them by date. Defaults to this method.
         Calling it again will resort things by date."""
@@ -203,6 +207,29 @@ class Corpus(object):
     def list_all_filenames(self):
         for text in self.texts:
             print(text.filename)
+
+    
+    def lda(self):
+        allthetokens = []
+        for text in self.texts:
+            allthetokens.append(text.tokens_without_stopwords)
+ #           tws = text.tokens_without_stopwords
+ #       flatlist = [item for sublist in allthetokens for item in sublist]
+## Working up untilthis point
+ #       print (allthetokens)
+        dictionary = corpora.Dictionary(allthetokens)
+        doc_term_matrix = [dictionary.doc2bow(doc) for doc in allthetokens]
+        Lda = gensim.models.ldamodel.LdaModel
+        ldamodel = Lda(doc_term_matrix, num_topics=3, id2word = dictionary, passes=50)
+##current output: <gensim.models.ldamodel.LdaModel object at 0x11dd39470>
+        returnthis = ldamodel.print_topics(num_topics=3, num_words=3)
+        return returnthis
+
+##Remaining issues: need to remove punctuation from allthetokens lists
+## is tdf-if necessary before running lda??
+## this takes SO LONG to run..
+## It's working though-- yay!
+    
 
     def find_by_filename(self, name):
         """given a filename, return the text associated with it."""
