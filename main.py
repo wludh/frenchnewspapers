@@ -19,7 +19,7 @@ import numpy as np
 from matplotlib.pyplot import figure, show
 from matplotlib.ticker import MaxNLocator
 import gensim
-from gensim import corpora
+from gensim import corpora, models, similarities
 
 
 
@@ -94,11 +94,7 @@ class Corpus(object):
         nltk_stopwords = stopwords.words('french')
         # stopwords from http://www.ranks.nl/stopwords/french
         ranks_stopwords = []
-        #with codecs.open('french_stopwords.txt', 'r', 'utf8') as f:
-#            ranks_stopwords = [x.strip('\n') for x in f]
-#            ranks_stopwords = [x.strip('\r') for x in f]
-        # put custom stopword list here. Could also
-        # read in as a csv file if that's easier.
+
 
         text = codecs.open("french_stopwords.txt", "r", 'utf8').read()
 
@@ -110,10 +106,6 @@ class Corpus(object):
         ranks_stopwords = [i.replace(' ', '') for i in ranks_stopwords]
 
         
-
-        ## Stopwords not being read......
-#        print (ranks_stopwords)
- #       print (nltk_stopwords)
         extra_stopwords = []
         punctuation = ['»', '«', ',', '-', '.', '!',
                        "\"", '\'' ':', ';', '?', '...']
@@ -227,6 +219,7 @@ class Corpus(object):
 
     
     def lda(self):
+#This function computes the Latent Dirichlet Allocation (LDA) for topic modeling.
         allthetokens = []
         numberoftopics = int(input("Please enter the number of topics for the LDA."))
         numberofwords = int(input("Please enter the number of words for each topic."))
@@ -240,9 +233,6 @@ class Corpus(object):
         text = text.replace('\n',' ')
 
         ranks_stopwords = text.split(",")
-        # put custom stopword list here. Could also
-        # read in as a csv file if that's easier.
- #       print (ranks_stopwords)
         extra_stopwords = []
         punctuation = ['»', '«', ',', '-', '.', '!',
                        "\"", '\'' ':', ';', '?', '...']
@@ -250,24 +240,13 @@ class Corpus(object):
                             punctuation + extra_stopwords)
         thestopwords = list(thestopwords)
         print (STOPWORD_LIST)
-  #      print (thestopwords)
         for text in self.texts:
-#            currenttext = text
-#            currenttext = [w for w in text if w.lower() not in thestopwords]
-## The stopwords arn't getting removed, but the punctuation is
-
             currenttext = text.tokens_without_stopwords
-##hmm removing only some of the stopwords i think
             
             textwithoutpunc = [word for word in currenttext if word.isalpha()]
- #           print (textwithoutpunc)
             allthetokens.append(textwithoutpunc)
- #       print (allthetokens[0])
         for subarray in range(0, len(allthetokens)):
-#            print (allthetokens[subarray])
             for word in range(0, len(allthetokens[subarray])):
-                #print (allthetokens[subarray][word])
-                #print (thestopwords)
                 if allthetokens[subarray][word] in thestopwords:
                     print ("yes")
                     allthetokens[subarray].remove(allthetokens[subarray][word])
@@ -281,7 +260,24 @@ class Corpus(object):
         returnthis = ldamodel.print_topics(num_topics=numberoftopics, num_words=numberofwords)
         return returnthis
 
-## is tdf-if necessary before running lda??
+
+    def lsi(self):
+
+#This function computes Latent Semantic Indexing (LSI) for topic modeling.
+        allthetokens = []
+        numberoftopics = int(input("Please enter the number of topics for the LSI."))
+        numberofwords = int(input("Please enter the number of words for each topic."))
+        for text in self.texts:
+            currenttext = text.tokens_without_stopwords
+            textwithoutpunc = [word for word in currenttext if word.isalpha()]
+            allthetokens.append(textwithoutpunc)
+        dictionary = corpora.Dictionary(allthetokens)
+        doc_term_matrix = [dictionary.doc2bow(doc) for doc in allthetokens]
+        lsi = models.LsiModel(doc_term_matrix, num_topics=numberoftopics, id2word=dictionary)
+        returnthis = lsi.print_topics(num_topics=numberoftopics, num_words = numberofwords)
+        return returnthis
+
+
 
 
     def find_by_filename(self, name):
