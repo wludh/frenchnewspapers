@@ -75,13 +75,15 @@ class ProcCorpus:
         os.makedirs(processed_dir)
 
         corpus = french_main.Corpus()
-        if args.genre_compare == "True" and os.path.exists('genre_corpus'):
-            genre_corpus = french_main.GenreCorpus()
-        elif args.genre_compare == "True":
-            raise ValueError("""Error: specified genre clustering but
-                 genre_corpus/ directory does not exist.""")
-        else:
-            pass
+ #       if args.genre_compare == "True" and os.path.exists('genre_corpus'):
+        genre_corpus = french_main.GenreCorpus()
+#        elif args.genre_compare == "True":
+#            raise ValueError("""Error: specified genre clustering but
+#                 genre_corpus/ directory does not exist.""")
+#        else:
+#            pass
+
+#These lines commented out because of error being raised
         corpus.group_articles_by_publication()
         for text in corpus.texts:
             self.filter_tags(processed_dir, tag_filter, text)
@@ -169,20 +171,46 @@ class ProcCorpus:
                 texts[fn] = f.read()
         return texts
 
-    def produce_tfidfs(self):
+ #   def produce_tfidfs(self):
+#        tfidf = TfidfVectorizer()
+#        tfs = tfidf.fit_transform(self.texts.values())
+#        return tfs
+# Added the above lines to the graph_clusters function to make scope a little
+#easier to deal with
+    def graph_clusters(self, args=ARGS):
+        ## Added lines:
         tfidf = TfidfVectorizer()
         tfs = tfidf.fit_transform(self.texts.values())
-        return tfs
+        numclusters = 5
+        ## end of added
 
-    def graph_clusters(self, args=ARGS):
+        
         labels = self.parse_names()
-        tfs = self.produce_tfidfs()
+ #       tfs = self.produce_tfidfs()
+#Deleted the above line after adding produce_tfidfs lines
+ 
         # will try and slot them into the nclusters
         try:
-            fitted = KMeans(n_clusters=5).fit(tfs)
+            fitted = KMeans(n_clusters=numclusters).fit(tfs)
         except ValueError:
             fitted = KMeans(n_clusters=2).fit(tfs)
         classes = fitted.predict(tfs)
+
+##Print the data regarding words found in each cluster.
+
+        centroids = fitted.cluster_centers_
+        order_centroids = fitted.cluster_centers_.argsort()[:, ::-1]
+        terms = tfidf.get_feature_names()
+        for i in range(numclusters):
+            print("Cluster %d words:" % i, end='')
+    
+            for ind in order_centroids[i, :6]: #replace 6 with n words per cluster
+                #http://brandonrose.org/clustering
+                print(" %s" % terms[ind], end = "")
+                print() #add whitespace
+
+
+        
         try:
             sklearn = PCA(n_components=5)
         except ValueError:
