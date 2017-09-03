@@ -11,7 +11,7 @@ $ git clone https://github.com/wludh/frenchnewspapers.git
 $ cd frenchnewspapers
 ```
 
-The scripts are written in python 3. First, install [homebrew](http://brew.sh/) if you haven't already: 
+The scripts are written in python 3. First, install [homebrew](http://brew.sh/) if you haven't already:
 ```
 $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
@@ -29,6 +29,7 @@ $ pip3 install treetaggerwrapper
 $ pip3 install matplotlib
 $ pip3 install scipy
 $ pip3 install sklearn
+$ pip3 install gensim
 ```
 
 For Part of Speech tagging, first install Tree Hugger by following the directions [here](http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/). You will want to install it into the root of the frenchnewspapers directory. This involves downloading four files from that link, but be careful that you don't unzip anything yourself. The installation script will do that for you. This involves creating a folder called 'tagger' in the project root, switching into that folder, and then running the install commands. Like so:
@@ -47,7 +48,7 @@ world   NOM <unknown>
 If you get results like this from the third command it was successful. You should be set up for things.
 
 # Usage
-Individual scripts can be created for a particular purpose by modifying the main() function in main.py. By default, it outputs a series of basic statistics about the corpus to the file results.txt when run as a program. 
+Individual scripts can be created for a particular purpose by modifying the main() function in main.py. By default, it outputs a series of basic statistics about the corpus to the file results.txt when run as a program.
 
 A more flexible way to interact with the corpus is by importing the main script in the python interpreter. First, fire up your python interpreter and import your main.py package.
 
@@ -57,7 +58,7 @@ $ python3
 >>> corpus = main.Corpus()
 ```
 
-The third line here loads the corpus from a given directory. By default, it reads in from a folder called "clean_ocr". If you don't have such a folder, you will have to create one and populate it with plain text files available from our WLU Box folder. 
+The third line here loads the corpus from a given directory. By default, it reads in from a folder called "clean_ocr". If you don't have such a folder, you will have to create one and populate it with plain text files available from our WLU Box folder.
 
 Once read in, the script prepares your corpus as a list of individual texts (organize by date by default) that can be accessed like this:
 
@@ -79,13 +80,13 @@ You can then access any individual text by selecting it from the list:
 
 I've baked in a variety of methods, some tied to the corpus itself:
 
-* corpus.corpus_dir 
+* corpus.corpus_dir
     * give name of the corpus directory
 * corpus.stopwords
     * give the list of stopwords currently being used.
 * corpus.names_list
     * give the list of proper names used for querying by proper names
-* corpus.texts 
+* corpus.texts
     * give the list of all the texts
 * corpus.sort_articles_by_date()
     * sort the articles by date.
@@ -113,6 +114,10 @@ I've baked in a variety of methods, some tied to the corpus itself:
     ```
 * corpus.preprocess_for_topic_modeling():
     * creates a new folder containing copies of the texts, but all the tokens are stemmed. in case we want to try topic modeling those instead.
+* corpus.lsi()
+    * performs Latent Semantic Indexing (LSI) for topic modeling on the corpus.
+* corpus.lda()
+    * performs Latent Dirichlet Allocation (LDA) for topic modeling on the corpus.  This takes significantly longer to run than LSI.
 
 Others are tied to the individual texts:
 
@@ -147,8 +152,8 @@ Others are tied to the individual texts:
 * text.tokens_without_stopwords
     * produces a list of tokens in the text with stopwords excluded.
 * text.bigrams
-    * produces a list of word pairs or bigrams for the text as a list of tuples. Ex. [‘this’, ‘is’, ‘a’, ‘sentence’] becomes [(‘this’, ‘is’), (‘is’, ‘a’), (‘a’, ‘sentence’)]. 
-    * Keep in mind that each tuple is a unit, denoted by the (). You can access them as a unit: text.trigrams.count(('mme', 'steinheil')) will give you the number of times the bigram 'mme steinheil' occurs in a text. 
+    * produces a list of word pairs or bigrams for the text as a list of tuples. Ex. [‘this’, ‘is’, ‘a’, ‘sentence’] becomes [(‘this’, ‘is’), (‘is’, ‘a’), (‘a’, ‘sentence’)].
+    * Keep in mind that each tuple is a unit, denoted by the (). You can access them as a unit: text.trigrams.count(('mme', 'steinheil')) will give you the number of times the bigram 'mme steinheil' occurs in a text.
     * Or you can break apart the tuple and manipulate each unit of the tuple separately. The following will loop over all bigrams by assigning variable names to first and second element in each tuple, check to see if the second word in the pair is 'steinheil' and, if so, print the pair to the console. It effectively gives a list of all the different words that Steinheil follows:
     ```python
     for first, second in my_text.bigrams:
@@ -175,7 +180,7 @@ Here I loop across the whole corpus, finding the length of each individual text.
 
 You should have everything you need for the basic building blocks of text analysis here. Let me know if anything else comes up.
 
-And a final note: be sure to re-sync your computer's copy of the repository with the master version here on GitHub when you get ready to work each day by running 
+And a final note: be sure to re-sync your computer's copy of the repository with the master version here on GitHub when you get ready to work each day by running
 
 ```bash
 $ git pull
@@ -186,4 +191,4 @@ To preform cluster analysis, type:
 ```bash
 $ python3 cluster_process.py -t 'VER'
 ```
-Where 'VER' will do verbs, you can insert any part of speech tag abbreviation. 
+Where 'VER' will do verbs, you can insert any part of speech tag abbreviation.
