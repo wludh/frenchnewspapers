@@ -6,6 +6,7 @@ import argparse
 import main as french_main
 import shutil
 import sys
+import stat
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -13,6 +14,8 @@ from sklearn.decomposition import PCA
 from collections import namedtuple
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
+
+#TO BE CLEANED UP
 
 
 # CORPUS = 'processed'
@@ -78,13 +81,17 @@ class ProcCorpus:
         os.makedirs(processed_dir)
 
         corpus = french_main.Corpus()
-        if args.genre_compare == "True" and os.path.exists('genre_corpus'):
-            genre_corpus = french_main.GenreCorpus()
-        elif args.genre_compare == "True":
-            raise ValueError("""Error: specified genre clustering but
-                 genre_corpus/ directory does not exist.""")
-        else:
-            pass
+        #if args.genre_compare == "True" and os.path.exists('genre_corpus'):
+        genre_corpus = french_main.GenreCorpus()
+        #elif args.genre_compare == "True":
+#            raise ValueError("""Error: specified genre clustering but
+#                 genre_corpus/ directory does not exist.""")
+        #else:
+#            pass
+
+
+# These lines commented out because error being raised
+
         corpus.group_articles_by_publication()
         for text in corpus.texts:
             self.filter_tags(processed_dir, tag_filter, text)
@@ -172,35 +179,72 @@ class ProcCorpus:
                 texts[fn] = f.read()
         return texts
 
-    def produce_tfidfs(self):
-        tfidf = TfidfVectorizer()
-        tfs = tfidf.fit_transform(self.texts.values())
-        return tfs
+ #   def produce_tfidfs(self):
+ #       tfidf = TfidfVectorizer()
+ #       tfs = tfidf.fit_transform(self.texts.values())
+#        return tfs
 
     def graph_clusters(self, args=ARGS):
         labels = self.parse_names()
         dates = self.parse_dates()
-        tfs = self.produce_tfidfs()
+        tfidf = TfidfVectorizer()
+        tfs = tfidf.fit_transform(self.texts.values())
+ #       tfs = self.produce_tfidfs()
+
+        num_clusters=5
+    # this does the TfidfVectorizer()
+        
+ #       print (tfs)
         # will try and slot them into the nclusters
         try:
-            fitted = KMeans(n_clusters=5).fit(tfs)
+            fitted = KMeans(n_clusters=num_clusters).fit(tfs)
         except ValueError:
-            fitted = KMeans(n_clusters=2).fit(tfs)
+            fitted = KMeans(n_clusters=num_clusters).fit(tfs)
+
+        
         classes = fitted.predict(tfs)
 
+        #print (classes)
+        centroids = fitted.cluster_centers_
+        order_centroids = fitted.cluster_centers_.argsort()[:, ::-1]
+        terms = tfidf.get_feature_names()
+        for i in range(num_clusters):
+            print("Cluster %d words:" % i, end='')
+    
+            for ind in order_centroids[i, :6]: #replace 6 with n words per cluster
+                #http://brandonrose.org/clustering
+                print(" %s" % terms[ind], end = "")
+                print() #add whitespace
 
+
+        #print (classes)
+        #print (centroids)
         try:
             sklearn = PCA(n_components=5)
-
-            ##^the number of clusters
         except ValueError:
             sklearn = PCA(n_components=2)
         try:
-            sklearn_transf = sklearn.fit_transform(tfs.toarray())
+            sklearn_transf = fitted.fit_transform(tfs.toarray())
+#            sklearn_transf = sklearn.fit_transform(tfs.toarray())
+            cluster_transf = sklearn.fit_transform(centroids.toarray())
         except:
             sklearn_transf = PCA(n_components=2).fit_transform(tfs.toarray())
+            #cluster_transf = PCA(n_components=2).fit_transform(centroids.toarray())
+
+        print (sklearn)
+        print (sklearn_transf)
+
         plt.scatter(sklearn_transf[:, 0],
-                    sklearn_transf[:, 1], c=classes, s=25, cmap=cm.Pastel1)
+                    sklearn_transf[:, 1], c=classes, s=1400, cmap=cm.Set2)
+        plt.scatter(centroids[:, 0], centroids[:, 1],
+                     marker='x', s=169, linewidths=3, color='k', zorder=8)
+   
+## I think it will be helpful to show the centroids
+        
+## check this out:
+## https://stackoverflow.com/questions/19849932/scatter-plot-segregate-clusters-by-color-matplotlib-python
+
+
 
 ## Color maps https://stackoverflow.com/questions/17682216/scatter-plot-and-color-mapping-in-python
 ## https://stackoverflow.com/questions/17682216/scatter-plot-and-color-mapping-in-python
@@ -227,11 +271,11 @@ class ProcCorpus:
 
         for i in range(len(classes)):
             plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=" ")
-            for key in date_to_symbol.keys():
-                if dates[i] == key:
-                    for key in journal_to_color.keys():
-                        if labels[i] == key and key in journal_to_color.keys():
-                            plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker=date_to_symbol[key], markersize=4, color=journal_to_color[key], zorder=1)
+            for date_key in date_to_symbol.keys():
+                if dates[i] == date_key:
+                    for journal_key in journal_to_color.keys():
+                        if labels[i] == journal_key:
+                            plt.plot(sklearn_transf[i, 0], sklearn_transf[i, 1], marker=date_to_symbol[date_key], markersize=4, color=journal_to_color[journal_key], zorder=1)
 
 
 
