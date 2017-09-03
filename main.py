@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import nltk
 from nltk import FreqDist
 import treetaggerwrapper
@@ -13,6 +11,15 @@ import csv
 import operator
 import datetime
 import dateutil.parser
+import matplotlib.pyplot as plt
+plt.rcdefaults()
+import numpy as np
+from matplotlib.pyplot import figure, show
+from matplotlib.ticker import MaxNLocator
+import gensim
+from gensim import corpora, models, similarities
+
+
 
 # TODO: stemming. will need to follow the example
 # TODO:
@@ -30,6 +37,12 @@ import dateutil.parser
 CORPUS = 'clean_ocr'
 STOPWORD_LIST = []
 LIST_OF_NAMES = []
+
+
+
+plt.rcdefaults()
+fig, ax = plt.subplots()
+
 
 
 class Corpus(object):
@@ -79,15 +92,24 @@ class Corpus(object):
         nltk_stopwords = stopwords.words('french')
         # stopwords from http://www.ranks.nl/stopwords/french
         ranks_stopwords = []
-        with codecs.open('french_stopwords.txt', 'r', 'utf8') as f:
-            ranks_stopwords = [x.strip('\n') for x in f]
-        # put custom stopword list here. Could also
-        # read in as a csv file if that's easier.
+
+
+        text = codecs.open("french_stopwords.txt", "r", 'utf8').read()
+
+        text = text.replace(' ', ',')
+        text = text.replace('\r',',')
+        text = text.replace('\n',' ')
+
+        ranks_stopwords = text.split(",")
+        ranks_stopwords = [i.replace(' ', '') for i in ranks_stopwords]
+
+        
         extra_stopwords = []
         punctuation = ['»', '«', ',', '-', '.', '!',
                        "\"", '\'' ':', ';', '?', '...']
         STOPWORD_LIST = set(nltk_stopwords + ranks_stopwords +
                             punctuation + extra_stopwords)
+        print (STOPWORD_LIST)
         return STOPWORD_LIST
 
     def generate_names_list(self):
@@ -115,6 +137,7 @@ class Corpus(object):
             output.write("Punctuation Counts: " +
                          str(text.count_punctuation()) + '\n')
             output.write("Names: " + str(text.find_names()) + '\n')
+
 
     def sort_articles_by_date(self):
         """Takes the corpus and sorts them by date. Defaults to this method.
@@ -191,6 +214,69 @@ class Corpus(object):
     def list_all_filenames(self):
         for text in self.texts:
             print(text.filename)
+
+    
+    def lda(self):
+#This function computes the Latent Dirichlet Allocation (LDA) for topic modeling.
+        allthetokens = []
+        numberoftopics = int(input("Please enter the number of topics for the LDA."))
+        numberofwords = int(input("Please enter the number of words for each topic."))
+        nltk_stopwords = stopwords.words('french')
+        # stopwords from http://www.ranks.nl/stopwords/french
+        ranks_stopwords = []
+        text = codecs.open("french_stopwords.txt", "r", 'utf8').read()
+
+        text = text.replace(' ', ',')
+        text = text.replace('\r',',')
+        text = text.replace('\n',' ')
+
+        ranks_stopwords = text.split(",")
+        extra_stopwords = []
+        punctuation = ['»', '«', ',', '-', '.', '!',
+                       "\"", '\'' ':', ';', '?', '...']
+        thestopwords = set(nltk_stopwords + ranks_stopwords +
+                            punctuation + extra_stopwords)
+        thestopwords = list(thestopwords)
+        print (STOPWORD_LIST)
+        for text in self.texts:
+            currenttext = text.tokens_without_stopwords
+            
+            textwithoutpunc = [word for word in currenttext if word.isalpha()]
+            allthetokens.append(textwithoutpunc)
+        for subarray in range(0, len(allthetokens)):
+            for word in range(0, len(allthetokens[subarray])):
+                if allthetokens[subarray][word] in thestopwords:
+                    print ("yes")
+                    allthetokens[subarray].remove(allthetokens[subarray][word])
+                    
+        print ("Please wait.  This could take some time...")
+
+        dictionary = corpora.Dictionary(allthetokens)
+        doc_term_matrix = [dictionary.doc2bow(doc) for doc in allthetokens]
+        Lda = gensim.models.ldamodel.LdaModel
+        ldamodel = Lda(doc_term_matrix, num_topics=numberoftopics, id2word = dictionary, passes=50)
+        returnthis = ldamodel.print_topics(num_topics=numberoftopics, num_words=numberofwords)
+        return returnthis
+
+
+    def lsi(self):
+
+#This function computes Latent Semantic Indexing (LSI) for topic modeling.
+        allthetokens = []
+        numberoftopics = int(input("Please enter the number of topics for the LSI."))
+        numberofwords = int(input("Please enter the number of words for each topic."))
+        for text in self.texts:
+            currenttext = text.tokens_without_stopwords
+            textwithoutpunc = [word for word in currenttext if word.isalpha()]
+            allthetokens.append(textwithoutpunc)
+        dictionary = corpora.Dictionary(allthetokens)
+        doc_term_matrix = [dictionary.doc2bow(doc) for doc in allthetokens]
+        lsi = models.LsiModel(doc_term_matrix, num_topics=numberoftopics, id2word=dictionary)
+        returnthis = lsi.print_topics(num_topics=numberoftopics, num_words = numberofwords)
+        return returnthis
+
+
+
 
     def find_by_filename(self, name):
         """given a filename, return the text associated with it."""
@@ -381,6 +467,182 @@ class IndexedText(object):
             results.append("%(mark)s, %(count)s" % locals())
         return(results)
 
+
+    def puncbysection_indiv(self):
+
+## This function creates charts of the frequency of all punctuation marks in all subdivisions of the text.
+## The character count of all of the subdivisions can be modified in the definition for the variable 'parts'
+        plt.rcdefaults()
+        fig, ax = plt.subplots()
+
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+
+        y_pos = np.arange(len(punctuation_marks))
+        thetext = self.text
+        parts = [thetext[i:i+1000] for i in range(0, len(thetext), 1000)]
+
+
+        for q in range(0, len(parts)):
+            thnumber = str(q + 1)
+            newthing = parts[q]
+            newthing = re.findall(r"[\w]+|[^\s\w]", newthing)
+            occur = []
+
+
+            for i in range(0, len(punctuation_marks)):
+                z=0
+                for x in range(0, len(newthing)):
+                    if punctuation_marks[i] == newthing[x]:
+                        z = z+1
+                occur.append(z)
+        
+            y_pos = np.arange(len(punctuation_marks))
+
+            plt.barh(y_pos, occur, align='center', alpha=0.5)
+            plt.yticks(y_pos, punctuation_marks)
+            plt.xlabel('Occur')
+            plt.title('Punctuation marks in section #' + thnumber + " of text")
+            plt.show()
+
+
+    def puncbysection_total(self):
+        
+## This function plots the appears of a given punctuation mark over the course of an entire text.
+
+
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+        mark = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ...  ' ")
+        for i in range (0, len(punctuation_marks)):
+
+            if mark == punctuation_marks[i]:
+
+
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+
+    ##The 500 character count can be changed depending on how long one wants the length of each
+    ## subdivisions to be
+                totaltally =[]
+                
+                for q in range(0, len(parts)):
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    totaltally.append(z)
+                        
+                    y_pos = np.arange(len(punctuation_marks[i]))
+                
+                noofsectionsforxaxis = []
+
+                newvari = punctuation_marks[i]
+
+                for i in range (0, len(totaltally)):
+                    addedone = i + 1
+                    noofsectionsforxaxis.append(addedone)
+
+        ##plt.rcdefaults()
+        ##fig, ax = plt.subplots()       
+        ax = figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(noofsectionsforxaxis, totaltally)
+        sortedtotaltally = totaltally
+        sortedtotaltally.sort(reverse=True)
+        heightofyaxis = sortedtotaltally[0] + 1
+        plt.axis([1, len(noofsectionsforxaxis), 0, heightofyaxis])
+        ax.set_xlabel('Chronological textual subdivision #')
+        ax.set_title('The Punctuation Mark ' + newvari + ' Over the Course of Text')
+        ax.set_ylabel('The number of occurrences of ' + newvari)
+        plt.legend([mark])
+        plt.show()
+
+    def multiple_punctuation(self):
+        punctuation_marks = ['»', '«', ',', '-', '.', '!',
+                             "\"", ':', ';', '?', '...', '\'']
+
+        mark1 = input("Please enter the punctuation mark you want to plot: » « , - . ! : ; ? ... ")
+        mark2 = input("Enter the second punctuation mark.")
+        totaltally = []
+        newtotaltally = []
+        noofsectionsforxaxis = []
+        
+        for i in range (0, len(punctuation_marks)):
+
+            if mark1 == punctuation_marks[i]:
+
+                y_pos = np.arange(len(punctuation_marks[i]))        
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+
+                for q in range(0, len(parts)):
+                    thnumber = str(q + 1)
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    totaltally.append(z)
+                        
+                    y_pos = np.arange(len(punctuation_marks[i]))
+            
+
+                newvari = punctuation_marks[i]
+
+                for i in range (0, len(totaltally)):
+                    addedone = i + 1
+                    noofsectionsforxaxis.append(addedone)
+
+
+            elif mark2 == punctuation_marks[i]:
+
+                text = self.text
+
+                parts = [text[i:i+500] for i in range(0, len(text), 500)]
+                
+                for q in range(0, len(parts)):
+                    thnumber = str(q + 1)
+                    newthing = parts[q]
+                    newthing = re.findall(r"[\w]+|[^\s\w]", newthing)                
+                    z=0
+                    for x in range(0, len(newthing)):
+                        if punctuation_marks[i] == newthing[x]:
+                            z = z+1
+                    newtotaltally.append(z)
+        print (totaltally)
+        print (newtotaltally)
+                
+                
+        ax = figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(noofsectionsforxaxis, totaltally)
+        plt.plot(noofsectionsforxaxis, newtotaltally)
+        totaltallysizing = totaltally
+        totaltallysizing.sort(reverse=True)
+        newtotaltallysizing = newtotaltally
+        newtotaltally.sort(reverse=True)
+        if totaltallysizing[0] > newtotaltallysizing[0]:
+            yaxassign = totaltallysizing[0]
+            yaxassign = yaxassign + 1
+        else:
+            yaxassign = newtotaltallysizing[0]
+            yaxassign = yaxassign + 1
+        plt.axis([1, len(noofsectionsforxaxis), 0, yaxassign])
+        ax.set_xlabel('Chronological textual subdivisions')
+        ax.set_title('The Punctuation Mark ' + mark1 + " & " + mark2 + ' Over the Course of Text')
+        ax.set_ylabel('The number of occurrences of ' + mark1 + " and " + mark2)
+        plt.legend([mark1, mark2])
+        plt.show()
+
+                
+
+
     def most_common(self):
         """takes a series of tokens and returns most common 50 words."""
         fd = FreqDist(self.tokens_without_stopwords)
@@ -425,6 +687,7 @@ class GenreText(IndexedText):
                          for (i, word) in enumerate(self.tokens))
         self.tokens_without_stopwords = self.remove_stopwords()
         self.tokens_without_punctuation = [word for word in self.tokens if word.isalpha()]
+
 
 
 class GenreCorpus(Corpus):
