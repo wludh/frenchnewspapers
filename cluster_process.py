@@ -236,6 +236,8 @@ class ProcCorpus:
         keys = []
         for key in self.texts.keys():
 
+            print (key)
+
             clean_key = re.sub(r'processed\/|\.txt|_chunk_[0-9]+\.txt',
                                '', key)
             split_key = re.split(r'_', clean_key)
@@ -249,32 +251,36 @@ class ProcCorpus:
                 keys.append(result)
             else:
                 split_key = re.split(r'_', clean_key)
+                print (split_key)
                 parsed_key = MetaData(' '.join(split_key[:-3]), split_key[-3],
                                       split_key[-2], split_key[-1])
+                print (parsed_key)
                 pub_mapping_dict = {'croix': 'c', 'figaro': 'f',
                                     'humanite': 'h', 'intransigeant': 'i',
                                     'journal': 'j',
                                     'matin': 'm', 'petit journal': 'pj',
                                     'petit parisien': 'pp', 'radical': 'r',
                                     'temps': 't'}
+                datekey = "-" + parsed_key.month + " " + parsed_key.day + "," +  parsed_key.year
+                result = ParsedMetaData(pub_mapping_dict[parsed_key.publication], datekey) 
                 # 1: June 1908
                 # 2: Nov. 1908
                 # 3: and Nov 1909
-                if parsed_key.month == 'june' and parsed_key.year == '1908':
-                    result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '1')
-                elif parsed_key.year == '1908' and \
-                        parsed_key.month == 'november':
-                    result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '2')
-                elif parsed_key.year == '1909':
-                    result = ParsedMetaData(pub_mapping_dict[
-                        parsed_key.publication], '3')
-                else:
-                    print(keys)
-                    print(split_key)
-                    print(parsed_key)
-                    result = 'SOMETHING HAS GONE WRONG'
+#                if parsed_key.month == 'june' and parsed_key.year == '1908':
+#                    result = ParsedMetaData(pub_mapping_dict[
+#                        parsed_key.publication], '1')
+#                elif parsed_key.year == '1908' and \
+#                        parsed_key.month == 'november':
+#                    result = ParsedMetaData(pub_mapping_dict[
+#                        parsed_key.publication], '2')
+#                elif parsed_key.year == '1909':
+#                    result = ParsedMetaData(pub_mapping_dict[
+#                        parsed_key.publication], '3')
+#                else:
+#                    print(keys)
+#                    print(split_key)
+#                    print(parsed_key)
+#                    result = 'SOMETHING HAS GONE WRONG'
                 # ['journal_key', 'date_key']
                 keys.append(result.journal_key + result.date_key)
         return keys
