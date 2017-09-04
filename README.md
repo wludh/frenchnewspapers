@@ -141,6 +141,10 @@ Others are tied to the individual texts:
     * give date of a text. Can be further broken down with text.year, text.month, and text.day
 * text.publication
     * give the name of the journal that published the text.
+* text.puncbysection_total
+    * shows the distribution of punctuation marks over the course of a text.
+* text.multiple_punctuation
+    * does the same as puncbysection_total, except for two punctuation marks at once
 * text.stemmer
     * produces a French stemmer for the text (not fully implemented yet)
 * text.token_count('token')
