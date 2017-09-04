@@ -6,7 +6,9 @@ import argparse
 import main as french_main
 import shutil
 import sys
+import pandas as pd
 
+from matplotlib.font_manager import FontProperties
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
@@ -183,9 +185,8 @@ class ProcCorpus:
         tfs = tfidf.fit_transform(self.texts.values())
         numclusters = 5
         ## end of added
-
-        
         labels = self.parse_names()
+        
  #       tfs = self.produce_tfidfs()
 #Deleted the above line after adding produce_tfidfs lines
  
@@ -199,17 +200,26 @@ class ProcCorpus:
 ##Print the data regarding words found in each cluster.
 
         centroids = fitted.cluster_centers_
+
+        labelsnoarrow = [x[7:] for x in labels]
+        thedict = {'Cluster':classes, 'Journal and Date':labelsnoarrow}
+
+        usethis = pd.DataFrame(thedict)
+
+        print (usethis)
+        
         order_centroids = fitted.cluster_centers_.argsort()[:, ::-1]
         terms = tfidf.get_feature_names()
         for i in range(numclusters):
             print("Cluster %d words:" % i, end='')
     
             for ind in order_centroids[i, :6]: #replace 6 with n words per cluster
-                #http://brandonrose.org/clustering
                 print(" %s" % terms[ind], end = "")
                 print() #add whitespace
-
-
+            current = usethis["Cluster"] == i
+            showthis = usethis[current]
+            print (showthis)
+        print ()
         
         try:
             sklearn = PCA(n_components=5)
@@ -220,9 +230,9 @@ class ProcCorpus:
         except:
             sklearn_transf = PCA(n_components=2).fit_transform(tfs.toarray())
         plt.scatter(sklearn_transf[:, 0],
-                    sklearn_transf[:, 1], c=classes, s=35)
+                    sklearn_transf[:, 1], c=classes, s=75)
         for i in range(len(classes)):
-            plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=labels[i])
+            plt.text(sklearn_transf[i, 0], sklearn_transf[i, 1], s=labels[i], size = 'xx-small')
         # plt.show()
         if not os.path.exists(ARGS.results_folder):
             os.makedirs(ARGS.results_folder)
@@ -251,10 +261,8 @@ class ProcCorpus:
                 keys.append(result)
             else:
                 split_key = re.split(r'_', clean_key)
-                print (split_key)
                 parsed_key = MetaData(' '.join(split_key[:-3]), split_key[-3],
                                       split_key[-2], split_key[-1])
-                print (parsed_key)
                 pub_mapping_dict = {'croix': 'c', 'figaro': 'f',
                                     'humanite': 'h', 'intransigeant': 'i',
                                     'journal': 'j',
@@ -282,7 +290,7 @@ class ProcCorpus:
 #                    print(parsed_key)
 #                    result = 'SOMETHING HAS GONE WRONG'
                 # ['journal_key', 'date_key']
-                keys.append(result.journal_key + result.date_key)
+                keys.append("   <-- " + result.journal_key + result.date_key)
         return keys
 
     def parse_shapes(self):
