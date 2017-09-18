@@ -186,6 +186,7 @@ class ProcCorpus:
         numclusters = 5
         ## end of added
         labels = self.parse_names()
+
         
  #       tfs = self.produce_tfidfs()
 #Deleted the above line after adding produce_tfidfs lines
@@ -201,12 +202,16 @@ class ProcCorpus:
 
         centroids = fitted.cluster_centers_
 
-        labelsnoarrow = [x[7:] for x in labels]
-        thedict = {'Cluster':classes, 'Journal and Date':labelsnoarrow}
+        print (labels)
+
+
+        labelsnoarrow = [x[7:] for x in labels if x[0] == ' ']
+        labelsnoletter = [x[2:] for x in labels if x[0] != ' ']
+        newlabels = labelsnoarrow + labelsnoletter
+        thedict = {'Cluster':classes, 'Journal and Date':newlabels}
 
         usethis = pd.DataFrame(thedict)
 
-        print (usethis)
         
         order_centroids = fitted.cluster_centers_.argsort()[:, ::-1]
         terms = tfidf.get_feature_names()
@@ -251,12 +256,12 @@ class ProcCorpus:
             clean_key = re.sub(r'processed\/|\.txt|_chunk_[0-9]+\.txt',
                                '', key)
             split_key = re.split(r'_', clean_key)
-            if split_key[1] in ['sex', 'crime', 'corruption']:
+            if split_key[1] in ['sex', 'crime', 'corruption','morality']:
                 split_key = re.split(r'_', clean_key)
                 parsed_key = GenreMetaData(split_key[0], split_key[1])
                 pub_mapping_dict = {'sex': 'x', 'crime': 'y',
-                                    'corruption': 'z'}
-                result = pub_mapping_dict[parsed_key.genre]
+                                    'corruption': 'z', 'morality': 'm', 'prostitution':'p'}
+                result = pub_mapping_dict[parsed_key.genre] + ' ' + split_key[0]
                 # ['journal_key', 'date_key']
                 keys.append(result)
             else:
